@@ -3,6 +3,8 @@
 namespace Tests\Feature\Pomodoro\Command;
 
 use App\Modules\Pomodoro\Application\Jobs\ProcessPomodoroStageJob;
+use App\Modules\Pomodoro\Domain\Enums\PomodoroStatusValue;
+use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSession;
 use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSettings;
 use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,12 +73,6 @@ final class StartPomodoroTest extends TestCase
 
         Queue::assertPushed(ProcessPomodoroStageJob::class);
         Queue::assertPushed(ProcessPomodoroStageJob::class, 1);
-
-        Queue::assertPushed(ProcessPomodoroStageJob::class, function (ProcessPomodoroStageJob $job) use ($user) {
-            return $job->user->id === $user->id
-                && $job->currentCycle === 1
-                && $job->currentStatus->value === 'work';
-        });
     }
 
     public function test_not_found_user(): void

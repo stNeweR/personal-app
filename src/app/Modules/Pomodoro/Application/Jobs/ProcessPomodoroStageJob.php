@@ -2,139 +2,26 @@
 
 namespace App\Modules\Pomodoro\Application\Jobs;
 
-use App\Core\Telegram\Infrastructure\Services\Telegram\DTOs\SendMessageDTO;
-use App\Core\Telegram\Infrastructure\Services\Telegram\TelegramApiClient;
+use App\Modules\Pomodoro\Application\Service\PomodoroStageService;
 use App\Modules\Pomodoro\Domain\Enums\PomodoroStatusValue;
-use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSession;
-use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSettings;
-use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 final class ProcessPomodoroStageJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        public readonly PomodoroSession $session,
-        public readonly User $user,
+        public readonly int $sessionId,
         public readonly int $currentCycle = 1,
         public readonly PomodoroStatusValue $currentStatus = PomodoroStatusValue::WORK
     ) {}
 
-    public function handle(TelegramApiClient $telegramApi): void
+    public function handle(PomodoroStageService $service): void
     {
-        $settings = PomodoroSettings::query()->where('user_id', $this->user->id)->first();
-
-        if (! $settings) {
-            Log::info('test');
-            $telegramApi->sendMessage(new SendMessageDTO(
-                chatId: $this->user->telegram_id,
-                text: __('pomodoro.setup_pomodoro_first')
-            ));
-
-            return;
-        }
-
-        $totalCycles = $settings->repeats_count ?? 1;
-
-        $this->session->refresh();
-        if ($this->session->current_status === PomodoroStatusValue::PAUSED ||
-            $this->session->current_status === PomodoroStatusValue::FINISHED) {
-            return;
-        }
-
-        if ($this->currentStatus === PomodoroStatusValue::WORK) {
-            Log::info('work');
-            $this->updateSessionStatus($this->session, PomodoroStatusValue::WORK);
-            $telegramApi->sendMessage(new SendMessageDTO(
-                chatId: $this->user->telegram_id,
-                text: __('pomodoro.work_started', ['duration' => $settings->work_duration])
-            ));
-
-            $delay = now()->addMinutes($settings->work_duration);
-
-            if ($this->currentCycle >= $totalCycles) {
-                $delay = now()->addMinutes($settings->work_duration);
-                ProcessPomodoroStageJob::dispatch(
-                    $this->session,
-                    $this->user,
-                    $this->currentCycle,
-                    PomodoroStatusValue::FINISHED
-                )->delay($delay);
-            } else {
-                ProcessPomodoroStageJob::dispatch(
-                    $this->session,
-                    $this->user,
-                    $this->currentCycle,
-                    PomodoroStatusValue::BREAK
-                )->delay($delay);
-            }
-        } elseif ($this->currentStatus === PomodoroStatusValue::FINISHED) {
-            $this->finishSession($telegramApi);
-        } else {
-            if ($this->currentCycle % $settings->cycles_before_long_break === 0 && $this->currentCycle !== $totalCycles && $settings->long_break_duration) {
-                Log::info('long_break');
-                $this->updateSessionStatus($this->session, PomodoroStatusValue::LONG_BREAK);
-                $telegramApi->sendMessage(new SendMessageDTO(
-                    chatId: $this->user->telegram_id,
-                    text: __('pomodoro.long_break_started', [
-                        'cycle' => $this->currentCycle,
-                        'duration' => $settings->long_break_duration,
-                    ])
-                ));
-
-                $delay = now()->addMinutes($settings->long_break_duration);
-
-                ProcessPomodoroStageJob::dispatch(
-                    $this->session,
-                    $this->user,
-                    $this->currentCycle + 1,
-                    PomodoroStatusValue::WORK
-                )->delay($delay);
-            } else {
-                Log::info('break');
-                $this->updateSessionStatus($this->session, PomodoroStatusValue::BREAK);
-
-                $telegramApi->sendMessage(new SendMessageDTO(
-                    chatId: $this->user->telegram_id,
-                    text: __('pomodoro.short_break_started', ['duration' => $settings->break_duration])
-                ));
-
-                $delay = now()->addMinutes($settings->break_duration);
-
-                ProcessPomodoroStageJob::dispatch(
-                    $this->session,
-                    $this->user,
-                    $this->currentCycle + 1,
-                    PomodoroStatusValue::WORK
-                )->delay($delay);
-            }
-        }
-    }
-
-    private function updateSessionStatus(PomodoroSession $session, PomodoroStatusValue $status): void
-    {
-        $session->update([
-            'current_status' => $status,
-            'current_cycle' => $this->currentCycle,
-        ]);
-    }
-
-    private function finishSession(TelegramApiClient $telegramApi): void
-    {
-        $this->session->update([
-            'current_status' => PomodoroStatusValue::FINISHED,
-            'end_at' => now(),
-        ]);
-        Log::info('finish');
-        $telegramApi->sendMessage(new SendMessageDTO(
-            chatId: $this->user->telegram_id,
-            text: __('pomodoro.pomodoro_completed')
-        ));
+        $service->resolve($this->sessionId, $this->currentCycle, $this->currentStatus);
     }
 }

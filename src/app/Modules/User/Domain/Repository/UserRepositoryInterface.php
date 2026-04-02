@@ -9,4 +9,6 @@ interface UserRepositoryInterface
     public function createUser(int $telegramId): User;
 
     public function getByTelegramId(int $telegramId): User;
+
+    public function getByUserId(int $userId): User;
 }

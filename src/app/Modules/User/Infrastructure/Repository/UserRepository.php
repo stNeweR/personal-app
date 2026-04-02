@@ -21,4 +21,10 @@ class UserRepository implements UserRepositoryInterface
             ->where('telegram_id', $telegramId)
             ->firstOrFail();
     }
+
+    public function getByUserId(int $userId): User
+    {
+        return User::query()
+            ->findOrFail($userId);
+    }
 }

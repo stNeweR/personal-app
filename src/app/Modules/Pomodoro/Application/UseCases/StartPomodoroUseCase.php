@@ -57,6 +57,6 @@ final readonly class StartPomodoroUseCase
 
         $session = $this->pomodoroSessionsRepository->create($user->id);
 
-        ProcessPomodoroStageJob::dispatch($session, $user, 1, PomodoroStatusValue::WORK);
+        ProcessPomodoroStageJob::dispatch($session->id, 1, PomodoroStatusValue::WORK);
     }
 }
