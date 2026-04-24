@@ -1,4 +1,0 @@
-192.168.65.1 - - [13/Mar/2026:04:55:22 +0000] "GET / HTTP/1.1" 500 6684 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
-192.168.65.1 - - [13/Mar/2026:04:55:22 +0000] "GET /favicon.ico HTTP/1.1" 200 0 "http://localhost/" "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
-192.168.65.1 - - [13/Mar/2026:04:55:27 +0000] "GET /up HTTP/1.1" 200 1953 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
-192.168.65.1 - - [13/Mar/2026:04:55:28 +0000] "GET /favicon.ico HTTP/1.1" 200 0 "http://localhost/up" "Mozilla/5.0 (X11; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
