@@ -1,7 +1,7 @@
 ## Краткая Сводка По Проекту
 
 - Название проекта: `personal-app`
-- Тип проекта: `web app, api`
+- Тип проекта: `web app, api, spa`
 - Однострочное описание: `Проект позволяет упростить жизнь и организовать всё что мне нужно для жизни в одном месте (помодоро таймер, работа с задачами, уведомления)`
 - Основные пользователи: `Один программист, в будущем могут быть простые люди`
 - Стадия жизненного цикла: `prototype`
@@ -42,10 +42,10 @@
 
 ### Основной Стек
 
-- Язык(и): `PHP 8.2+`
-- Runtime(s): `PHP 8.3`
-- Framework(s): `Laravel 12`
-- Package manager(s): `composer`, `task` (Taskfile)
+- Язык(и): `PHP 8.2+`, `TypeScript`
+- Runtime(s): `PHP 8.3`, `Node.js`
+- Framework(s): `Laravel 12`, `Vue 3`
+- Package manager(s): `composer`, `npm`, `task` (Taskfile)
 - База(ы) данных: `PostgreSQL 16`
 
 ### Ключевые Библиотеки И Сервисы
@@ -58,6 +58,13 @@
 | `testing` | `phpunit/phpunit` | `11.5+` | Тестирование | Через `task test` |
 | `static-analysis` | `larastan/larastan` | `3.0` | Статический анализ | Через `task stan` |
 | `code-style` | `laravel/pint` | `1.24` | Автоформатирование | PSR-12, через `task pint` |
+| `frontend` | `vue` | `3.5+` | UI фреймворк | Composition API, `<script setup lang="ts">` |
+| `frontend` | `pinia` | `3.0` | State management | Вместо Vuex |
+| `frontend` | `vue-router` | `5.0` | Роутинг | SPA навигация |
+| `frontend` | `tailwindcss` | `4.0+` | Стилизация | Utility-first CSS |
+| `frontend` | `oxlint` | — | Линтер | Быстрый линтер для Vue/TS |
+| `frontend` | `eslint` | `10.2+` | Линтер | TypeScript + Vue конфиг |
+| `frontend` | `oxfmt` | — | Форматтер | Через `npm run format` |
 
 ---
 
@@ -87,7 +94,7 @@ src/app/Modules/<Module>/
 ## Структура Репозитория
 
 ```text
-src/
+src/                       # Backend (Laravel)
 ├── app/
 │   ├── Core/              # Общие модули (Telegram и др.)
 │   └── Modules/
@@ -103,6 +110,29 @@ src/
 └── _docker/
     ├── dev/               # Dev-окружение
     └── prod/              # Production-окружение
+
+front/                     # Frontend (Vue 3 SPA)
+├── src/
+│   ├── modules/           # Модули фронтенда (pomodoro, user, ...)
+│   │   └── <Module>/
+│   │       ├── api/       # API-клиент, запросы к backend
+│   │       ├── components/# Vue-компоненты модуля
+│   │       ├── composables/# Переиспользуемая логика (useXxx)
+│   │       ├── pages/     # Страницы/вьюхи модуля
+│   │       ├── router/    # Роуты модуля
+│   │       ├── stores/    # Pinia-сторы модуля
+│   │       └── types/     # TypeScript типы модуля
+│   ├── shared/            # Общий код между модулями
+│   │   ├── components/    # Переиспользуемые UI-компоненты
+│   │   ├── composables/   # Общие composables
+│   │   ├── utils/         # Утилиты, хелперы
+│   │   └── types/         # Глобальные типы
+│   ├── App.vue
+│   ├── main.ts
+│   └── router/
+│       └── index.ts       # Корневой роутер (объединяет модули)
+├── public/
+└── package.json
 ```
 
 ---
@@ -187,6 +217,38 @@ docker compose -f docker-compose.prod.yml up -d
 - **Формат ответов**: JSON
 - **DTO**: Использовать `spatie/laravel-data` для запросов и ответов
 - **Обработка ошибок**: Стандартные Laravel HTTP статусы
+
+---
+
+## Frontend Convention
+
+### Архитектурный стиль
+
+- **Модульная архитектура**: Каждый bounded context (pomodoro, user и т.д.) — отдельный модуль в `src/modules/<Module>/`.
+- **Модули изолированы**: Модуль не импортирует внутренности другого модуля напрямую. Общение через `shared/`.
+- **Composition API + `<script setup lang="ts">`**: Единственный стиль написания компонентов.
+
+### Структура Модуля
+
+```
+src/modules/<Module>/
+├── api/                   # Функции для HTTP-запросов к backend
+├── components/            # Vue-компоненты, специфичные для модуля
+├── composables/           # Логика, привязанная к модулю (usePomodoroTimer и т.д.)
+├── pages/                 # Страницы, подключаемые в router
+├── router/                # Роуты модуля (экспортируются и регистрируются в корневом router)
+├── stores/                # Pinia stores модуля
+└── types/                 # TypeScript интерфейсы и типы модуля
+```
+
+### Правила
+
+- **Импорты**: Использовать path alias `@/` (указывает на `src/`).
+- **Стили**: TailwindCSS. Избегать inline-стилей и scoped CSS, если можно обойтись utility-классами.
+- **Сторы**: Одна доменная область — один Pinia store. Использовать setup-стиль сторов.
+- **Типизация**: Всё типизировать строго. Никаких `any` без крайней необходимости.
+- **API**: Централизовать вызовы backend в `api/` каждого модуля. Использовать `fetch` или `axios` (если добавлен).
+- **Роутер**: Каждый модуль экспортирует свои роуты; корневой `router/index.ts` импортирует и объединяет их.
 
 ---
 

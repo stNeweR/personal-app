@@ -1,6 +1,6 @@
 # Dependencies
 vendor/
-node_modules/
+front/node_modules/
 
 # Environment files
 .env
