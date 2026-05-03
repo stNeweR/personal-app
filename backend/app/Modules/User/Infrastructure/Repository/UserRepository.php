@@ -4,6 +4,7 @@ namespace App\Modules\User\Infrastructure\Repository;
 
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use App\Modules\User\Infrastructure\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -26,5 +27,21 @@ class UserRepository implements UserRepositoryInterface
     {
         return User::query()
             ->findOrFail($userId);
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        return User::query()
+            ->where('email', $email)
+            ->first();
+    }
+
+    public function createApiUser(string $name, string $email, string $password): User
+    {
+        return User::query()->create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($password),
+        ]);
     }
 }

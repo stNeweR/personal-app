@@ -11,4 +11,8 @@ interface UserRepositoryInterface
     public function getByTelegramId(int $telegramId): User;
 
     public function getByUserId(int $userId): User;
+
+    public function findByEmail(string $email): ?User;
+
+    public function createApiUser(string $name, string $email, string $password): User;
 }
