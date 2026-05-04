@@ -14,7 +14,6 @@ async function handleSubmit() {
     await auth.login({ email: email.value, password: password.value })
     router.push('/dashboard')
   } catch {
-    // error отображается через auth.error
   }
 }
 </script>

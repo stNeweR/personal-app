@@ -1,7 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-interface RequestOptions extends RequestInit {
-  body?: Record<string, unknown> | string | null
+interface RequestOptions {
+  method?: string
+  headers?: Record<string, string>
+  body?: unknown
 }
 
 export async function apiClient<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -10,7 +12,7 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    ...((options.headers as Record<string, string>) || {}),
+    ...options.headers,
   }
 
   if (token) {
@@ -18,7 +20,7 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
+    method: options.method || 'GET',
     headers,
     body: options.body ? JSON.stringify(options.body) : null,
   })
