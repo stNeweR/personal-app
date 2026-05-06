@@ -8,7 +8,9 @@ use App\Modules\User\Application\DTOs\AuthUserResponseDTO;
 use App\Modules\User\Application\DTOs\LoginUserDTO;
 use App\Modules\User\Application\DTOs\LogoutResponseDTO;
 use App\Modules\User\Application\DTOs\RegisterUserDTO;
+use App\Modules\User\Application\DTOs\TelegramLinkTokenResponseDTO;
 use App\Modules\User\Application\DTOs\UserProfileDTO;
+use App\Modules\User\Application\UseCases\Auth\GenerateTelegramLinkTokenUseCase;
 use App\Modules\User\Application\UseCases\Auth\GetAuthenticatedUserUseCase;
 use App\Modules\User\Application\UseCases\Auth\LoginUserUseCase;
 use App\Modules\User\Application\UseCases\Auth\LogoutUserUseCase;
@@ -38,5 +40,14 @@ final class AuthController
     public function me(GetAuthenticatedUserUseCase $useCase): UserProfileDTO
     {
         return UserProfileDTO::from($useCase->execute());
+    }
+
+    public function telegramLinkToken(GenerateTelegramLinkTokenUseCase $useCase): TelegramLinkTokenResponseDTO
+    {
+        $linkData = $useCase->execute();
+
+        return new TelegramLinkTokenResponseDTO(
+            link_url: "https://t.me/{$linkData->botName}?start={$linkData->token}",
+        );
     }
 }

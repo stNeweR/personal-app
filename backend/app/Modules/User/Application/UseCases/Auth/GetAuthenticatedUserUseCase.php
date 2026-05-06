@@ -14,12 +14,14 @@ final readonly class GetAuthenticatedUserUseCase
      */
     public function execute(): array
     {
+        /** @var User $user */
         $user = Auth::user();
 
         return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'telegram_id' => $user->telegram_id,
         ];
     }
 }

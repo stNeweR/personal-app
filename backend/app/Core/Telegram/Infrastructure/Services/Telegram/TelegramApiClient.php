@@ -27,7 +27,7 @@ final class TelegramApiClient implements TelegramApiClientInterface
     {
         $applicationEndpoint = Config::string('app.url').'/'.Config::string('telegram.application_webhook_endpoint');
 
-        $response = Http::post($this->telegramApiUrl.'/setWebhook', [
+        $response = Http::timeout(30)->post($this->telegramApiUrl.'/setWebhook', [
             'url' => $applicationEndpoint,
         ]);
 
@@ -36,7 +36,7 @@ final class TelegramApiClient implements TelegramApiClientInterface
 
     public function sendMessage(SendMessageDTO $dto): TelegramApiResponse
     {
-        $response = Http::post($this->telegramApiUrl.'/sendMessage', $dto->toArray());
+        $response = Http::timeout(10)->post($this->telegramApiUrl.'/sendMessage', $dto->toArray());
 
         return TelegramApiResponse::from($response->json());
     }

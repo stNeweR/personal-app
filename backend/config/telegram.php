@@ -11,6 +11,8 @@ use App\Modules\User\Application\Handlers\Command\StartCommandHandler;
 return [
     'telegram_bot_token' => env('TELEGRAM_BOT_TOKEN'),
 
+    'telegram_bot_name' => env('TELEGRAM_BOT_NAME', ''),
+
     'application_webhook_endpoint' => env('APPLICATION_WEBHOOK_ENDPOINT', ''),
 
     'telegram_url' => env('TELEGRAM_URL', ''),

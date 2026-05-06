@@ -2,6 +2,7 @@ export interface User {
   id: number
   name: string
   email: string
+  telegram_id: number | null
 }
 
 export interface AuthResponse {
@@ -19,4 +20,8 @@ export interface RegisterPayload {
   email: string
   password: string
   password_confirmation: string
+}
+
+export interface TelegramLinkTokenResponse {
+  link_url: string
 }

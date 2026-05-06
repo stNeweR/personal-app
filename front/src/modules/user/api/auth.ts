@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/api/client'
-import type { AuthResponse, LoginPayload, RegisterPayload, User } from '../types/auth'
+import type { AuthResponse, LoginPayload, RegisterPayload, TelegramLinkTokenResponse, User } from '../types/auth'
 
 export function login(payload: LoginPayload): Promise<AuthResponse> {
   return apiClient<AuthResponse>('/api/v1/auth/login', {
@@ -23,4 +23,10 @@ export function logout(): Promise<{ message: string }> {
 
 export function me(): Promise<User> {
   return apiClient<User>('/api/v1/auth/me')
+}
+
+export function generateTelegramLinkToken(): Promise<TelegramLinkTokenResponse> {
+  return apiClient<TelegramLinkTokenResponse>('/api/v1/auth/telegram-link-token', {
+    method: 'POST',
+  })
 }

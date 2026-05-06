@@ -20,6 +20,13 @@ tasks:
       - sleep 1
       - lt --port 3000 --subdomain my-bot
 
+  up-se:
+    desc: Запуск всех сервисов и serveo
+    cmds:
+      - docker compose up -d
+      - sleep 1
+      - ssh -R my-bot:80:localhost:3000 serveo.net
+
   down:
     desc: Остановка всех сервисов
     cmds:
