@@ -17,13 +17,17 @@ final class PomodoroSessionsRepository implements PomodoroSessionsRepositoryInte
             ->findOrFail($sessionId);
     }
 
-    public function create(int $userId): PomodoroSession
+    /**
+     * @param  array<string, mixed>|null  $settings
+     */
+    public function create(int $userId, ?array $settings = null): PomodoroSession
     {
         return PomodoroSession::query()->create([
             'user_id' => $userId,
             'current_status' => PomodoroStatusValue::WORK,
             'start_at' => now(),
             'current_cycle' => 1,
+            'settings' => $settings,
         ]);
     }
 

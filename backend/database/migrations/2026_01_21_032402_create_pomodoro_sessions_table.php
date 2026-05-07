@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    private const TABLE_NAME = 'pomodoro_session';
+    private const TABLE_NAME = 'pomodoro_sessions';
 
     public function up(): void
     {

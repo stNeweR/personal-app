@@ -31,4 +31,17 @@ final class PomodoroSettingsRepository implements PomodoroSettingsRepositoryInte
         return PomodoroSettings::query()
             ->firstWhere('user_id', $userId);
     }
+
+    public function upsert(int $userId, array $data): PomodoroSettings
+    {
+        $settings = PomodoroSettings::query()->firstWhere('user_id', $userId);
+
+        if ($settings) {
+            $settings->update($data);
+
+            return $settings->refresh();
+        }
+
+        return PomodoroSettings::query()->create(array_merge(['user_id' => $userId], $data));
+    }
 }

@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface PomodoroSessionsRepositoryInterface
 {
-    public function create(int $userId): PomodoroSession;
+    /**
+     * @param  array<string, mixed>|null  $settings
+     */
+    public function create(int $userId, ?array $settings = null): PomodoroSession;
 
     public function findActiveSession(int $userId): ?PomodoroSession;
 

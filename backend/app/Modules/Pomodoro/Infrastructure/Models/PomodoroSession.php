@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class PomodoroSession extends Model
 {
-    protected $table = 'pomodoro_session';
+    protected $table = 'pomodoro_sessions';
 
     protected $fillable = [
         'user_id',
@@ -28,6 +28,7 @@ final class PomodoroSession extends Model
         'start_at',
         'end_at',
         'current_cycle',
+        'settings',
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ final class PomodoroSession extends Model
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'current_cycle' => 'integer',
+        'settings' => 'array',
     ];
 
     /**

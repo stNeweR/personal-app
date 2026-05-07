@@ -11,17 +11,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table(self::TABLE_NAME, function (Blueprint $table) {
-            $table->integer('current_cycle')
-                ->default(1)
-                ->after('current_status')
-                ->comment('Номер текущего цикла Pomodoro');
+            $table->json('settings')
+                ->nullable()
+                ->after('current_cycle')
+                ->comment('Inline настройки сессии (если пользователь запустил без сохранённых настроек)');
         });
     }
 
     public function down(): void
     {
         Schema::table(self::TABLE_NAME, function (Blueprint $table) {
-            $table->dropColumn('current_cycle');
+            $table->dropColumn('settings');
         });
     }
 };

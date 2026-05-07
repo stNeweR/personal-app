@@ -11,4 +11,9 @@ interface PomodoroSettingsRepositoryInterface
     public function update(int $userId, string $column, int $value): bool;
 
     public function getByUserId(int $userId): ?PomodoroSettings;
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function upsert(int $userId, array $data): PomodoroSettings;
 }

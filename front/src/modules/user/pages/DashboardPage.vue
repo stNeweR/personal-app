@@ -119,6 +119,12 @@ function statusColor(status: string): string {
             {{ linkLoading ? 'Генерация...' : 'Привязать Telegram' }}
           </button>
           <span v-else class="text-sm text-green-600 font-medium">Telegram привязан ✅</span>
+          <router-link
+            to="/pomodoro"
+            class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition"
+          >
+            Помодоро таймер
+          </router-link>
         </div>
         <p class="text-gray-600">
           Это ваш личный кабинет. Здесь отображается ваша персональная информация и статистика.
