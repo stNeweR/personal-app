@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
-import { generateTelegramLinkToken } from '../api/auth'
 import { getTodaySessions } from '@/modules/pomodoro/api/sessions'
 import type { PomodoroSession } from '@/modules/pomodoro/types/session'
 
@@ -12,9 +11,6 @@ const auth = useAuthStore()
 const sessions = ref<PomodoroSession[]>([])
 const sessionsLoading = ref(false)
 const sessionsError = ref<string | null>(null)
-
-const linkLoading = ref(false)
-const linkError = ref<string | null>(null)
 
 onMounted(() => {
   if (!auth.user) {
@@ -33,18 +29,6 @@ async function loadSessions() {
     sessionsError.value = e instanceof Error ? e.message : 'Failed to load sessions'
   } finally {
     sessionsLoading.value = false
-  }
-}
-
-async function handleLinkTelegram() {
-  linkLoading.value = true
-  linkError.value = null
-  try {
-    const response = await generateTelegramLinkToken()
-    window.location.href = response.link_url
-  } catch (e) {
-    linkError.value = e instanceof Error ? e.message : 'Failed to generate link'
-    linkLoading.value = false
   }
 }
 
@@ -104,32 +88,14 @@ function statusColor(status: string): string {
 
     <!-- Content -->
     <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
-      <!-- Welcome -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-bold text-gray-800">
-            Добро пожаловать{{ auth.user ? ', ' + auth.user.name : '' }}!
-          </h2>
-          <button
-            v-if="!auth.user?.telegram_id"
-            @click="handleLinkTelegram"
-            :disabled="linkLoading"
-            class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
-          >
-            {{ linkLoading ? 'Генерация...' : 'Привязать Telegram' }}
-          </button>
-          <span v-else class="text-sm text-green-600 font-medium">Telegram привязан ✅</span>
-          <router-link
-            to="/pomodoro"
-            class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition"
-          >
-            Помодоро таймер
-          </router-link>
-        </div>
-        <p class="text-gray-600">
-          Это ваш личный кабинет. Здесь отображается ваша персональная информация и статистика.
-        </p>
-        <p v-if="linkError" class="text-red-500 text-sm mt-2">{{ linkError }}</p>
+      <!-- Start Pomodoro -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 flex justify-center">
+        <router-link
+          to="/pomodoro"
+          class="px-6 py-3 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-base font-medium shadow hover:opacity-90 transition"
+        >
+          Запустить помодоро
+        </router-link>
       </div>
 
       <!-- Pomodoro Sessions -->
@@ -148,7 +114,7 @@ function statusColor(status: string): string {
         <div v-if="sessionsError" class="text-red-500 text-sm mb-4">{{ sessionsError }}</div>
 
         <div v-if="sessions.length === 0 && !sessionsLoading" class="text-gray-500 text-center py-8">
-          Сегодня сессий пока нет. Запустите таймер через Telegram бота!
+          Сегодня сессий пока нет. Запустите их пройдя в <router-link to="/pomodoro" class="text-blue-600 hover:underline">таймер</router-link>
         </div>
 
         <div v-else-if="sessions.length > 0" class="overflow-x-auto">

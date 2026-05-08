@@ -4,6 +4,7 @@ namespace App\Modules\Pomodoro\Domain\Repository;
 
 use App\Modules\Pomodoro\Domain\Enums\PomodoroStatusValue;
 use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSession;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 interface PomodoroSessionsRepositoryInterface
@@ -22,7 +23,16 @@ interface PomodoroSessionsRepositoryInterface
 
     public function getBySessionId(int $sessionId): PomodoroSession;
 
-    public function updateSessionStatus(int $sessionId, PomodoroStatusValue $status, int $currentCycle): bool;
+    public function updateSessionStatus(
+        int $sessionId,
+        PomodoroStatusValue $status,
+        int $currentCycle,
+        ?PomodoroStatusValue $previousStatus = null,
+        ?Carbon $phaseStartedAt = null,
+        ?int $timeLeft = null,
+    ): bool;
 
     public function endSession(int $sessionId): bool;
+
+    public function delete(int $sessionId): bool;
 }

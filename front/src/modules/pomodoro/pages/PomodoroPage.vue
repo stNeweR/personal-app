@@ -8,11 +8,11 @@ const router = useRouter()
 const store = usePomodoroStore()
 
 const showSettings = ref(false)
-const showSessionSettings = ref(false)
 const settingsChecked = ref(false)
 
 onMounted(async () => {
   await store.loadUserSettings()
+  await store.restoreSession()
   settingsChecked.value = true
 })
 
@@ -71,8 +71,8 @@ async function handleToggle(): Promise<void> {
   await store.toggle()
 }
 
-function handleReset(): void {
-  store.reset()
+async function handleReset(): Promise<void> {
+  await store.reset()
 }
 
 function handleSkip(): void {
@@ -92,14 +92,6 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
   }
 }
 
-function saveSessionSettings(settings: typeof store.settings): void {
-  store.setSessionSettings(settings)
-  showSessionSettings.value = false
-}
-
-function openSessionSettings(): void {
-  showSessionSettings.value = true
-}
 </script>
 
 <template>
@@ -119,16 +111,6 @@ function openSessionSettings(): void {
           </button>
           <h1 class="text-xl font-bold">Помодоро</h1>
         </div>
-        <button
-          @click="openSettings"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm font-medium"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Настройки
-        </button>
       </div>
     </header>
 
@@ -264,9 +246,17 @@ function openSessionSettings(): void {
           </div>
         </div>
 
-        <!-- Quick Settings Preview -->
+        <!-- Settings -->
         <div class="mt-6 bg-white rounded-2xl shadow-lg p-5">
-          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Текущие настройки</h3>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Настройки</h3>
+            <button
+              @click="openSettings"
+              class="text-sm font-medium text-accent-purple hover:text-accent-blue transition"
+            >
+              Изменить
+            </button>
+          </div>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Работа</span>
@@ -290,45 +280,6 @@ function openSessionSettings(): void {
             </div>
           </div>
         </div>
-
-        <!-- Session Settings -->
-        <div class="mt-4 bg-white rounded-2xl shadow-lg p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Настройки текущей сессии</h3>
-            <button
-              @click="openSessionSettings"
-              class="text-sm font-medium text-accent-purple hover:text-accent-blue transition"
-            >
-              {{ store.isUsingSessionSettings ? 'Изменить' : 'Задать' }}
-            </button>
-          </div>
-          <div v-if="store.isUsingSessionSettings" class="grid grid-cols-2 gap-4 text-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Работа</span>
-              <span class="font-semibold text-gray-800">{{ store.activeSettings.workTime }} мин</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Перерыв</span>
-              <span class="font-semibold text-gray-800">{{ store.activeSettings.breakTime }} мин</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Длинный перерыв</span>
-              <span class="font-semibold text-gray-800">{{ store.activeSettings.longBreakTime }} мин</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Сессий до долгого</span>
-              <span class="font-semibold text-gray-800">{{ store.activeSettings.sessionsBeforeLongBreak }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Всего помодоро</span>
-              <span class="font-semibold text-gray-800">{{ store.activeSettings.totalPomodoros }}</span>
-            </div>
-          </div>
-          <p v-else class="text-sm text-gray-500">
-            Будут использованы настройки профиля.
-            <span v-if="!store.hasBackendSettings" class="text-yellow-600"> У вас нет сохранённых настроек — задайте их или используйте настройки текущей сессии.</span>
-          </p>
-        </div>
       </div>
     </main>
 
@@ -339,11 +290,6 @@ function openSessionSettings(): void {
       @save="saveSettings"
     />
 
-    <!-- Session Settings Modal -->
-    <PomodoroSettingsModal
-      v-model="showSessionSettings"
-      :settings="store.activeSettings"
-      @save="saveSessionSettings"
-    />
+
   </div>
 </template>

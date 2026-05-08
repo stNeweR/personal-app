@@ -11,8 +11,11 @@ final class PomodoroSessionDTO extends Data
     public function __construct(
         public readonly int $id,
         public readonly string $current_status,
+        public readonly ?string $previous_status,
         public readonly ?string $start_at,
         public readonly ?string $end_at,
         public readonly int $current_cycle,
+        public readonly ?string $phase_started_at,
+        public readonly ?int $time_left,
     ) {}
 }

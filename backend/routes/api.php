@@ -21,9 +21,11 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->prefix('pomodoro')->group(function () {
         Route::get('sessions', [PomodoroController::class, 'today']);
+        Route::get('sessions/active', [PomodoroController::class, 'activeSession']);
         Route::get('settings', [PomodoroController::class, 'getSettings']);
         Route::post('settings', [PomodoroController::class, 'saveSettings']);
         Route::post('sessions', [PomodoroController::class, 'createSession']);
         Route::patch('sessions/{id}', [PomodoroController::class, 'updateSession']);
+        Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
     });
 });

@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property DateTime|null $start_at
  * @property DateTime|null $end_at
  * @property int $current_cycle
+ * @property PomodoroStatusValue|null $previous_status
+ * @property DateTime|null $phase_started_at
+ * @property int|null $time_left
  */
 final class PomodoroSession extends Model
 {
@@ -25,18 +28,24 @@ final class PomodoroSession extends Model
     protected $fillable = [
         'user_id',
         'current_status',
+        'previous_status',
         'start_at',
         'end_at',
         'current_cycle',
         'settings',
+        'phase_started_at',
+        'time_left',
     ];
 
     protected $casts = [
         'current_status' => PomodoroStatusValue::class,
+        'previous_status' => PomodoroStatusValue::class,
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'current_cycle' => 'integer',
         'settings' => 'array',
+        'phase_started_at' => 'datetime',
+        'time_left' => 'integer',
     ];
 
     /**

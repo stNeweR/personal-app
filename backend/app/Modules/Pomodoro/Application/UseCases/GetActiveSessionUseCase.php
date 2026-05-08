@@ -4,27 +4,26 @@ declare(strict_types=1);
 
 namespace App\Modules\Pomodoro\Application\UseCases;
 
-use App\Modules\Pomodoro\Application\DTOs\CreatePomodoroSessionRequestDTO;
 use App\Modules\Pomodoro\Application\DTOs\PomodoroSessionDTO;
 use App\Modules\Pomodoro\Domain\Repository\PomodoroSessionsRepositoryInterface;
 use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-final readonly class CreatePomodoroSessionUseCase
+final readonly class GetActiveSessionUseCase
 {
     public function __construct(
         private PomodoroSessionsRepositoryInterface $pomodoroSessionsRepository,
     ) {}
 
-    public function execute(CreatePomodoroSessionRequestDTO $data): PomodoroSessionDTO
+    public function execute(): ?PomodoroSessionDTO
     {
         /** @var User $user */
         $user = Auth::user();
+        $session = $this->pomodoroSessionsRepository->findActiveSession($user->id);
 
-        $session = $this->pomodoroSessionsRepository->create(
-            userId: $user->id,
-            settings: $data->settings,
-        );
+        if ($session === null) {
+            return null;
+        }
 
         return new PomodoroSessionDTO(
             id: $session->id,

@@ -3,8 +3,6 @@
 namespace Tests\Feature\Pomodoro\Command;
 
 use App\Modules\Pomodoro\Application\Jobs\ProcessPomodoroStageJob;
-use App\Modules\Pomodoro\Domain\Enums\PomodoroStatusValue;
-use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSession;
 use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSettings;
 use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

@@ -14,5 +14,8 @@ final class UpdatePomodoroSessionRequestDTO extends Data
     public function __construct(
         public readonly string $currentStatus,
         public readonly int $currentCycle,
+        public readonly ?string $previousStatus = null,
+        public readonly ?string $phaseStartedAt = null,
+        public readonly ?int $timeLeft = null,
     ) {}
 }

@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { DEFAULT_SETTINGS, type PomodoroSettings, toBackendSettings } from '../types/settings'
 import { getUserSettings, saveUserSettings } from '../api/settings'
-import { createSession, updateSession } from '../api/sessions'
+import { createSession, deleteSession, getActiveSession, updateSession } from '../api/sessions'
 
 const SETTINGS_KEY = 'pomodoro_settings'
 
@@ -51,7 +51,8 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
   const isUsingSessionSettings = computed(() => sessionSettings.value !== null)
 
   const currentDuration = computed(() => {
-    switch (status.value) {
+    const effective = status.value === 'paused' ? previousStatus.value : status.value
+    switch (effective) {
       case 'work':
         return activeSettings.value.workTime * 60
       case 'break':
@@ -141,11 +142,26 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
 
   async function syncSessionStatus(): Promise<void> {
     if (sessionId.value === null) return
+    if (status.value === 'idle') return
+
     try {
-      await updateSession(sessionId.value, {
+      const payload: Parameters<typeof updateSession>[1] = {
         current_status: status.value,
         current_cycle: completedSessions.value + 1,
-      })
+      }
+
+      if (status.value === 'paused' && previousStatus.value !== 'idle') {
+        payload.previous_status = previousStatus.value
+      }
+
+      if (status.value === 'paused') {
+        payload.time_left = timeLeft.value
+      } else if (status.value !== 'finished') {
+        const elapsed = currentDuration.value - timeLeft.value
+        payload.phase_started_at = new Date(Date.now() - elapsed * 1000).toISOString()
+      }
+
+      await updateSession(sessionId.value, payload)
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to update session'
     }
@@ -156,7 +172,8 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     try {
       await updateSession(sessionId.value, {
         current_status: 'finished',
-        current_cycle: completedSessions.value,
+        current_cycle: Math.max(1, completedSessions.value),
+        time_left: 0,
       })
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to end session'
@@ -217,26 +234,86 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     }
     status.value = previousStatus.value
     startTick()
+    syncSessionStatus()
   }
 
   async function toggle(): Promise<void> {
     if (status.value === 'idle' || status.value === 'finished') {
-      reset()
+      await reset()
       await startSessionOnBackend()
       startWork()
+      await syncSessionStatus()
     } else if (isRunning.value) {
       pause()
     } else {
       if (timeLeft.value <= 0) {
-        handleTimerComplete()
+        await handleTimerComplete()
         return
+      }
+      if (previousStatus.value === 'idle') {
+        previousStatus.value = 'work'
       }
       status.value = previousStatus.value
       startTick()
+      await syncSessionStatus()
     }
   }
 
-  function reset(): void {
+  async function restoreSession(): Promise<void> {
+    try {
+      const session = await getActiveSession()
+      if (!session || typeof session.id !== 'number' || session.current_status === 'finished') {
+        return
+      }
+
+      sessionId.value = session.id
+      status.value = session.current_status as TimerStatus
+      previousStatus.value = (session.previous_status as TimerStatus) || 'idle'
+      completedSessions.value = Math.max(0, session.current_cycle - 1)
+
+      if (session.settings) {
+        sessionSettings.value = {
+          workTime: session.settings.work_duration,
+          breakTime: session.settings.break_duration,
+          longBreakTime: session.settings.long_break_duration ?? 15,
+          sessionsBeforeLongBreak: session.settings.cycles_before_long_break ?? 4,
+          totalPomodoros: session.settings.repeats_count,
+        }
+      }
+
+      if (session.current_status === 'paused') {
+        timeLeft.value = session.time_left ?? currentDuration.value
+        return
+      }
+
+      if (session.phase_started_at) {
+        const phaseStart = new Date(session.phase_started_at).getTime()
+        const elapsed = Math.floor((Date.now() - phaseStart) / 1000)
+        const duration = currentDuration.value
+        timeLeft.value = Math.max(0, duration - elapsed)
+
+        if (timeLeft.value === 0) {
+          handleTimerComplete()
+        } else {
+          startTick()
+        }
+      } else {
+        timeLeft.value = currentDuration.value
+        startTick()
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to restore session'
+    }
+  }
+
+  async function reset(): Promise<void> {
+    if (sessionId.value !== null) {
+      try {
+        await deleteSession(sessionId.value)
+      } catch {
+        // ignore delete errors
+      }
+    }
     clearInterval(intervalId.value ?? undefined)
     intervalId.value = null
     status.value = 'idle'
@@ -248,7 +325,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     error.value = null
   }
 
-  function handleTimerComplete(): void {
+  async function handleTimerComplete(): Promise<void> {
     clearInterval(intervalId.value ?? undefined)
     intervalId.value = null
 
@@ -258,22 +335,22 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
         finishSession()
       } else if (completedSessions.value % activeSettings.value.sessionsBeforeLongBreak === 0) {
         startLongBreak()
-        syncSessionStatus()
+        await syncSessionStatus()
       } else {
         startBreak()
-        syncSessionStatus()
+        await syncSessionStatus()
       }
     } else if (status.value === 'break' || status.value === 'long_break') {
       if (completedSessions.value < activeSettings.value.totalPomodoros) {
         startWork()
-        syncSessionStatus()
+        await syncSessionStatus()
       } else {
         finishSession()
       }
     }
   }
 
-  function skipPhase(): void {
+  async function skipPhase(): Promise<void> {
     clearInterval(intervalId.value ?? undefined)
     intervalId.value = null
 
@@ -284,19 +361,19 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
       } else if (completedSessions.value % activeSettings.value.sessionsBeforeLongBreak === 0) {
         status.value = 'long_break'
         timeLeft.value = activeSettings.value.longBreakTime * 60
-        syncSessionStatus()
+        await syncSessionStatus()
         startTick()
       } else {
         status.value = 'break'
         timeLeft.value = activeSettings.value.breakTime * 60
-        syncSessionStatus()
+        await syncSessionStatus()
         startTick()
       }
     } else if (status.value === 'break' || status.value === 'long_break') {
       if (completedSessions.value < activeSettings.value.totalPomodoros) {
         status.value = 'work'
         timeLeft.value = activeSettings.value.workTime * 60
-        syncSessionStatus()
+        await syncSessionStatus()
         startTick()
       } else {
         finishSession()
@@ -310,7 +387,12 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
-  const formattedTimeLeft = computed(() => formatTime(timeLeft.value))
+  const formattedTimeLeft = computed(() => {
+    if (status.value === 'idle' || status.value === 'finished') {
+      return formatTime(activeSettings.value.workTime * 60)
+    }
+    return formatTime(timeLeft.value)
+  })
 
   return {
     settings,
@@ -338,6 +420,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     resume,
     toggle,
     reset,
+    restoreSession,
     skipPhase,
     formatTime,
   }

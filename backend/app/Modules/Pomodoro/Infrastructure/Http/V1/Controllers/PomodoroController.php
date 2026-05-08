@@ -11,6 +11,8 @@ use App\Modules\Pomodoro\Application\DTOs\SavePomodoroSettingsDTO;
 use App\Modules\Pomodoro\Application\DTOs\TodaySessionsResponseDTO;
 use App\Modules\Pomodoro\Application\DTOs\UpdatePomodoroSessionRequestDTO;
 use App\Modules\Pomodoro\Application\UseCases\CreatePomodoroSessionUseCase;
+use App\Modules\Pomodoro\Application\UseCases\DeletePomodoroSessionUseCase;
+use App\Modules\Pomodoro\Application\UseCases\GetActiveSessionUseCase;
 use App\Modules\Pomodoro\Application\UseCases\GetPomodoroSettingsForWebUseCase;
 use App\Modules\Pomodoro\Application\UseCases\GetTodaySessionsForUserUseCase;
 use App\Modules\Pomodoro\Application\UseCases\SavePomodoroSettingsUseCase;
@@ -25,6 +27,17 @@ final class PomodoroController
     public function today(GetTodaySessionsForUserUseCase $useCase): TodaySessionsResponseDTO
     {
         return $useCase->execute();
+    }
+
+    public function activeSession(GetActiveSessionUseCase $useCase): PomodoroSessionDTO|JsonResponse
+    {
+        $session = $useCase->execute();
+
+        if ($session === null) {
+            return response()->json(null);
+        }
+
+        return $session;
     }
 
     public function getSettings(GetPomodoroSettingsForWebUseCase $useCase): PomodoroSettingsResponseDTO|JsonResponse
@@ -51,5 +64,12 @@ final class PomodoroController
     public function updateSession(int $id, UpdatePomodoroSessionRequest $request, UpdatePomodoroSessionUseCase $useCase): PomodoroSessionDTO
     {
         return $useCase->execute($id, UpdatePomodoroSessionRequestDTO::from($request->validated()));
+    }
+
+    public function deleteSession(int $id, DeletePomodoroSessionUseCase $useCase): \Illuminate\Http\JsonResponse
+    {
+        $useCase->execute($id);
+
+        return response()->json(['message' => 'Session deleted']);
     }
 }

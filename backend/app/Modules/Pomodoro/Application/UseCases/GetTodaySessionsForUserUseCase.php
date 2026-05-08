@@ -27,9 +27,12 @@ final readonly class GetTodaySessionsForUserUseCase
             return new PomodoroSessionDTO(
                 id: $session->id,
                 current_status: $session->current_status->value,
+                previous_status: $session->previous_status?->value,
                 start_at: $session->start_at?->format('Y-m-d H:i:s'),
                 end_at: $session->end_at?->format('Y-m-d H:i:s'),
                 current_cycle: $session->current_cycle,
+                phase_started_at: $session->phase_started_at?->format('c'),
+                time_left: $session->time_left,
             );
         })->all();
 

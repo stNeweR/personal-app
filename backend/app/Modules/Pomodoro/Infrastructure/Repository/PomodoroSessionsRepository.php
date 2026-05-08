@@ -28,13 +28,15 @@ final class PomodoroSessionsRepository implements PomodoroSessionsRepositoryInte
             'start_at' => now(),
             'current_cycle' => 1,
             'settings' => $settings,
+            'phase_started_at' => now(),
+            'time_left' => (is_int($settings['work_duration'] ?? null) ? $settings['work_duration'] : 25) * 60,
         ]);
     }
 
     public function findActiveSession(int $userId): ?PomodoroSession
     {
         return PomodoroSession::query()->where('user_id', $userId)
-            ->whereNotIn('current_status', [PomodoroStatusValue::FINISHED, PomodoroStatusValue::PAUSED])
+            ->where('current_status', '!=', PomodoroStatusValue::FINISHED)
             ->first();
     }
 
@@ -60,12 +62,32 @@ final class PomodoroSessionsRepository implements PomodoroSessionsRepositoryInte
         return $session->refresh();
     }
 
-    public function updateSessionStatus(int $sessionId, PomodoroStatusValue $status, int $currentCycle): bool
-    {
-        return $this->getBySessionId($sessionId)->update([
+    public function updateSessionStatus(
+        int $sessionId,
+        PomodoroStatusValue $status,
+        int $currentCycle,
+        ?PomodoroStatusValue $previousStatus = null,
+        ?Carbon $phaseStartedAt = null,
+        ?int $timeLeft = null,
+    ): bool {
+        $update = [
             'current_status' => $status,
             'current_cycle' => $currentCycle,
-        ]);
+        ];
+
+        if ($previousStatus !== null) {
+            $update['previous_status'] = $previousStatus;
+        }
+
+        if ($phaseStartedAt !== null) {
+            $update['phase_started_at'] = $phaseStartedAt;
+        }
+
+        if ($timeLeft !== null) {
+            $update['time_left'] = $timeLeft;
+        }
+
+        return $this->getBySessionId($sessionId)->update($update);
     }
 
     public function endSession(int $sessionId): bool
@@ -74,5 +96,10 @@ final class PomodoroSessionsRepository implements PomodoroSessionsRepositoryInte
             'current_status' => PomodoroStatusValue::FINISHED,
             'end_at' => now(),
         ]);
+    }
+
+    public function delete(int $sessionId): bool
+    {
+        return $this->getBySessionId($sessionId)->delete();
     }
 }

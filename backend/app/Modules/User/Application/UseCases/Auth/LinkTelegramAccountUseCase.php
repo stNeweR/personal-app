@@ -6,7 +6,6 @@ namespace App\Modules\User\Application\UseCases\Auth;
 
 use App\Modules\User\Domain\Repository\TelegramLinkTokenRepositoryInterface;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
-use App\Modules\User\Infrastructure\Models\TelegramLinkToken;
 
 final readonly class LinkTelegramAccountUseCase
 {

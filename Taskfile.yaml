@@ -37,6 +37,12 @@ tasks:
     cmds:
       - docker exec -it bot_app sh
 
+
+  node:
+    desc: Попасть в контейнер node
+    cmds:
+      - docker exec -it bot_node sh
+
   logs:
     desc: Просмотр логов
     cmds:
@@ -61,6 +67,11 @@ tasks:
     desc: Запуск composer install
     cmds:
       - docker compose exec app composer install
+
+  npm-install:
+    desc: Установка npm-зависимостей в контейнере (синхронизируется с хостом)
+    cmds:
+      - docker compose exec node npm install
 
   composer-update:
     desc: Запуск composer update
