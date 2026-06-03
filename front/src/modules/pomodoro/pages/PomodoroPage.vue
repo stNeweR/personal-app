@@ -91,7 +91,6 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
     // error is already set in store
   }
 }
-
 </script>
 
 <template>
@@ -104,8 +103,19 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
             @click="router.push('/dashboard')"
             class="flex items-center gap-1 text-sm font-medium hover:opacity-80 transition"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Назад
           </button>
@@ -123,8 +133,19 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
           class="mb-4 bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-sm text-indigo-800"
         >
           <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
             <span class="font-medium">Используются настройки текущей сессии</span>
           </div>
@@ -160,29 +181,82 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
           <!-- Session Info -->
           <div class="flex items-center justify-center gap-6 mb-8 text-sm text-gray-500">
             <div class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-accent-purple"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
-              <span>Сессий: <strong class="text-gray-700">{{ store.completedSessions }}</strong></span>
+              <span
+                >Сессий: <strong class="text-gray-700">{{ store.completedSessions }}</strong></span
+              >
             </div>
             <div v-if="store.isSessionFinished" class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-purple-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                />
               </svg>
               <span><strong class="text-gray-700">Все помодоро завершены!</strong></span>
             </div>
             <div v-else-if="store.currentPomodoro > 0" class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-green-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
               <span>
                 Помодоро
-                <strong class="text-gray-700">{{ store.currentPomodoro }} из {{ store.settings.totalPomodoros }}</strong>
+                <strong class="text-gray-700"
+                  >{{ store.currentPomodoro }} из {{ store.settings.totalPomodoros }}</strong
+                >
               </span>
             </div>
-            <div v-if="!store.isSessionFinished && store.status !== 'work' && store.status !== 'paused'" class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div
+              v-if="
+                !store.isSessionFinished && store.status !== 'work' && store.status !== 'paused'
+              "
+              class="flex items-center gap-1.5"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-accent-blue"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span>
                 Следующий:
@@ -200,8 +274,19 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
               class="p-4 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
               title="Сбросить"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
             </button>
 
@@ -218,8 +303,18 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <svg
                 v-else
@@ -229,9 +324,22 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
-              {{ store.isRunning ? 'Пауза' : (store.status === 'paused' ? 'Продолжить' : (store.isSessionFinished ? 'Начать заново' : 'Старт')) }}
+              {{
+                store.isRunning
+                  ? 'Пауза'
+                  : store.status === 'paused'
+                    ? 'Продолжить'
+                    : store.isSessionFinished
+                      ? 'Начать заново'
+                      : 'Старт'
+              }}
             </button>
 
             <button
@@ -239,8 +347,19 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
               class="p-4 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
               title="Пропустить фазу"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>
@@ -268,11 +387,15 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
             </div>
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Длинный перерыв</span>
-              <span class="font-semibold text-gray-800">{{ store.settings.longBreakTime }} мин</span>
+              <span class="font-semibold text-gray-800"
+                >{{ store.settings.longBreakTime }} мин</span
+              >
             </div>
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Сессий до долгого</span>
-              <span class="font-semibold text-gray-800">{{ store.settings.sessionsBeforeLongBreak }}</span>
+              <span class="font-semibold text-gray-800">{{
+                store.settings.sessionsBeforeLongBreak
+              }}</span>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-gray-600">Всего помодоро</span>
@@ -284,12 +407,6 @@ async function saveSettings(settings: typeof store.settings): Promise<void> {
     </main>
 
     <!-- Settings Modal -->
-    <PomodoroSettingsModal
-      v-model="showSettings"
-      :settings="store.settings"
-      @save="saveSettings"
-    />
-
-
+    <PomodoroSettingsModal v-model="showSettings" :settings="store.settings" @save="saveSettings" />
   </div>
 </template>

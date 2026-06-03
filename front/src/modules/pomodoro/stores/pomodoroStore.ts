@@ -15,7 +15,8 @@ function loadLocalSettings(): PomodoroSettings {
         workTime: parsed.workTime ?? DEFAULT_SETTINGS.workTime,
         breakTime: parsed.breakTime ?? DEFAULT_SETTINGS.breakTime,
         longBreakTime: parsed.longBreakTime ?? DEFAULT_SETTINGS.longBreakTime,
-        sessionsBeforeLongBreak: parsed.sessionsBeforeLongBreak ?? DEFAULT_SETTINGS.sessionsBeforeLongBreak,
+        sessionsBeforeLongBreak:
+          parsed.sessionsBeforeLongBreak ?? DEFAULT_SETTINGS.sessionsBeforeLongBreak,
         totalPomodoros: parsed.totalPomodoros ?? DEFAULT_SETTINGS.totalPomodoros,
       }
     }
@@ -46,7 +47,9 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
 
   const activeSettings = computed<PomodoroSettings>(() => sessionSettings.value ?? settings.value)
 
-  const isRunning = computed(() => status.value !== 'idle' && status.value !== 'paused' && status.value !== 'finished')
+  const isRunning = computed(
+    () => status.value !== 'idle' && status.value !== 'paused' && status.value !== 'finished',
+  )
   const isSessionFinished = computed(() => status.value === 'finished')
   const isUsingSessionSettings = computed(() => sessionSettings.value !== null)
 
@@ -86,7 +89,10 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
       saveLocalSettings(settings.value)
       hasBackendSettings.value = true
     } catch (e) {
-      if (e instanceof Error && (e.message.includes('404') || e.message.includes('Settings not found'))) {
+      if (
+        e instanceof Error &&
+        (e.message.includes('404') || e.message.includes('Settings not found'))
+      ) {
         hasBackendSettings.value = false
       } else {
         error.value = e instanceof Error ? e.message : 'Failed to load settings'
@@ -129,9 +135,10 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
   async function startSessionOnBackend(): Promise<void> {
     if (sessionId.value !== null) return
     try {
-      const payload = sessionSettings.value !== null
-        ? { settings: toBackendSettings(sessionSettings.value) }
-        : { settings: null }
+      const payload =
+        sessionSettings.value !== null
+          ? { settings: toBackendSettings(sessionSettings.value) }
+          : { settings: null }
       const session = await createSession(payload)
       sessionId.value = session.id
     } catch (e) {

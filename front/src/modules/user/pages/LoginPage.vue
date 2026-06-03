@@ -13,13 +13,14 @@ async function handleSubmit() {
   try {
     await auth.login({ email: email.value, password: password.value })
     router.push('/dashboard')
-  } catch {
-  }
+  } catch {}
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent-purple to-accent-blue px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent-purple to-accent-blue px-4"
+  >
     <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
       <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Вход</h1>
       <p class="text-center text-gray-500 mb-6">Войдите в свой аккаунт</p>

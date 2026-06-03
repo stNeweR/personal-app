@@ -1,24 +1,27 @@
-FROM php:8.3.6-fpm-alpine3.19
+FROM php:8.3-fpm
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --2.7.2 \
     && php -r "unlink('composer-setup.php');" \
     && mv composer.phar /usr/local/bin/composer
 
-RUN apk --update --no-cache add  \
-    $PHPIZE_DEPS \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     libpq-dev \
-    linux-headers \
-    freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libffi-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_pgsql sockets gd exif\
-    && pecl install redis-6.0.2 xdebug\
-    && docker-php-ext-enable redis xdebug gd\
-    && apk del $PHPIZE_DEPS
+    && docker-php-ext-install -j$(nproc) pdo_pgsql sockets gd exif ffi \
+    && pecl install redis-6.0.2 xdebug \
+    && docker-php-ext-enable redis xdebug gd ffi \
+    && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/ffi.ini \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup -g 1000 app && \
-    adduser -u 1000 -G app -s /bin/sh -D app
+RUN groupadd -g 1000 app && \
+    useradd -u 1000 -g app -s /bin/sh -m app
 
 RUN mkdir -p /var/www && chown -R app:app /var/www
 

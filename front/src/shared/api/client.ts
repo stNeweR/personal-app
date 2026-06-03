@@ -11,7 +11,7 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
     ...options.headers,
   }
 

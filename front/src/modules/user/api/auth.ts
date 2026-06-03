@@ -1,5 +1,11 @@
 import { apiClient } from '@/shared/api/client'
-import type { AuthResponse, LoginPayload, RegisterPayload, TelegramLinkTokenResponse, User } from '../types/auth'
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  TelegramLinkTokenResponse,
+  User,
+} from '../types/auth'
 
 export function login(payload: LoginPayload): Promise<AuthResponse> {
   return apiClient<AuthResponse>('/api/v1/auth/login', {

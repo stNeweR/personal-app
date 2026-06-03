@@ -19,5 +19,3 @@ export interface TodaySessionsResponse {
 export interface CreateSessionRequest {
   settings?: BackendPomodoroSettings | null
 }
-
-

@@ -24,7 +24,10 @@ export interface UpdateSessionPayload {
   time_left?: number
 }
 
-export function updateSession(sessionId: number, data: UpdateSessionPayload): Promise<PomodoroSession> {
+export function updateSession(
+  sessionId: number,
+  data: UpdateSessionPayload,
+): Promise<PomodoroSession> {
   return apiClient<PomodoroSession>(`/api/v1/pomodoro/sessions/${sessionId}`, {
     method: 'PATCH',
     body: data,

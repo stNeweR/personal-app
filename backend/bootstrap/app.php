@@ -1,8 +1,10 @@
 <?php
 
+use App\Modules\Plugin\Domain\Exceptions\PluginExecutionException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,5 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PluginExecutionException $e): JsonResponse {
+            return response()->json(['message' => $e->getMessage()], 400);
+        });
     })->create();
