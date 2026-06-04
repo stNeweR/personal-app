@@ -11,16 +11,16 @@ import (
 	"personal-app/plugins/shared"
 
 	// Register all plugins via side-effect imports
-	_ "personal-app/plugins/calendar"
-	_ "personal-app/plugins/converter"
-	_ "personal-app/plugins/notifier"
+	_ "personal-app/plugins/mail_notifier"
+	_ "personal-app/plugins/playlist"
+	_ "personal-app/plugins/telegram"
 	_ "personal-app/plugins/todoist"
-	_ "personal-app/plugins/weather"
 	_ "personal-app/plugins/yandex_calendar"
 )
 
 // plugin_execute runs a plugin action and returns a JSON string.
 // The returned pointer must be freed by the caller using plugin_free.
+//
 //export plugin_execute
 func plugin_execute(pluginName *C.char, action *C.char, jsonInput *C.char) *C.char {
 	name := C.GoString(pluginName)
@@ -41,6 +41,7 @@ func plugin_execute(pluginName *C.char, action *C.char, jsonInput *C.char) *C.ch
 }
 
 // plugin_free releases memory allocated by plugin_execute.
+//
 //export plugin_free
 func plugin_free(ptr *C.char) {
 	C.free(unsafe.Pointer(ptr))

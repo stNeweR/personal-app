@@ -62,4 +62,13 @@ return [
     'long_break_started' => 'Длинный перерыв после :cycle цикла. Отдохните :duration минут.',
     'short_break_started' => 'Короткий перерыв. Отдохните :duration минут.',
     'pomodoro_completed' => 'Поздравляем! Вы завершили все циклы Pomodoro.',
+
+    // NotifyPomodoroPhaseChangeUseCase (email subject)
+    'notify_email_subject' => 'Pomodoro — уведомление',
+
+    // NotifyPomodoroPhaseChangeUseCase (messages)
+    'notify_work_complete_short' => '🍅 Работа завершена! Время для перерыва (:duration мин).',
+    'notify_work_complete_long' => '🍅 Работа завершена! Время для длинного перерыва (:duration мин).',
+    'notify_break_complete' => '✅ Перерыв завершён! Возвращаемся к работе (:duration мин).',
+    'notify_session_complete' => '🎉 Все помодоро в сессии завершены! Отличная работа!',
 ];

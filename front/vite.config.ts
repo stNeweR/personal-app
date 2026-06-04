@@ -12,6 +12,17 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    allowedHosts: ['my-bot.loca.lt', '.loca.lt'],
+    proxy: {
+      '/api': {
+        target: 'http://nginx:80',
+        changeOrigin: true,
+      },
+      '/sanctum': {
+        target: 'http://nginx:80',
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {

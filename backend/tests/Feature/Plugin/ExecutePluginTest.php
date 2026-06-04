@@ -24,7 +24,7 @@ final class ExecutePluginTest extends TestCase
 
     public function test_guest_cannot_execute_plugin(): void
     {
-        $response = $this->postJson("{$this->url}/calendar/list_events");
+        $response = $this->postJson("{$this->url}/yandex_calendar/list_events");
 
         $response->assertUnauthorized();
     }
@@ -40,12 +40,12 @@ final class ExecutePluginTest extends TestCase
 
         $mock = $this->createMock(PluginExecutorInterface::class);
         $mock->method('execute')
-            ->with('calendar', 'list_events', [])
+            ->with('yandex_calendar', 'list_events', [])
             ->willReturn(['events' => []]);
 
         $this->app->instance(PluginExecutorInterface::class, $mock);
 
-        $response = $this->actingAs($user)->postJson("{$this->url}/calendar/list_events");
+        $response = $this->actingAs($user)->postJson("{$this->url}/yandex_calendar/list_events");
 
         $response->assertOk()
             ->assertJson([

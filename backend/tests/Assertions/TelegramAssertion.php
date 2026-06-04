@@ -1,97 +1,88 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Assertions;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Assert;
 
 trait TelegramAssertion
 {
+    /**
+     * @return Collection<int, mixed>
+     */
     public function getTelegramRequests(?string $endpoint = null): Collection
     {
-        $telegramUrl = config('telegram.telegram_url');
-        $botToken = config('telegram.telegram_bot_token');
+        $action = $endpoint === null || $endpoint === '/sendMessage'
+            ? 'send_message'
+            : ltrim($endpoint, '/');
 
-        $allRequests = Http::recorded();
-
-        if ($endpoint === null) {
-            return collect($allRequests)
-                ->filter(
-                    fn ($pair) => str_contains(
-                        $pair[0]->url(),
-                        '/bot'.$botToken,
-                    ),
-                )
-                ->map(fn ($pair) => $pair[0]);
-        }
-
-        $fullUrl = $telegramUrl.'/bot'.$botToken.$endpoint;
-
-        return collect($allRequests)
-            ->filter(fn ($pair) => $pair[0]->url() === $fullUrl)
-            ->map(fn ($pair) => $pair[0]);
+        return collect($this->telegramRecorder->callsFor($action));
     }
 
     public function assertTelegramRequestSent(
         string $endpoint,
         array $expectedData = [],
     ): void {
-        $telegramUrl = config('telegram.telegram_url');
-        $botToken = config('telegram.telegram_bot_token');
-        $fullUrl = $telegramUrl.'/bot'.$botToken.$endpoint;
+        $requests = $this->getTelegramRequests($endpoint);
 
-        Http::assertSent(function ($request) use ($fullUrl, $expectedData) {
-            if ($request->url() !== $fullUrl) {
-                return false;
-            }
+        Assert::assertTrue(
+            $requests->isNotEmpty(),
+            "Expected at least one Telegram request to {$endpoint}",
+        );
 
-            foreach ($expectedData as $key => $value) {
-                if ($request[$key] !== $value) {
-                    return false;
+        if ($expectedData !== []) {
+            $matched = $requests->contains(function (array $call) use ($expectedData): bool {
+                foreach ($expectedData as $key => $value) {
+                    if (($call['data'][$key] ?? null) !== $value) {
+                        return false;
+                    }
                 }
-            }
 
-            return true;
-        });
+                return true;
+            });
+
+            Assert::assertTrue(
+                $matched,
+                "Expected Telegram request to {$endpoint} matching: ".json_encode($expectedData),
+            );
+        }
     }
 
     public function assertTelegramMessageSent(
         int $chatId,
         ?string $text = null,
     ): void {
-        $telegramUrl = config('telegram.telegram_url');
-        $botToken = config('telegram.telegram_bot_token');
-        $fullUrl = $telegramUrl.'/bot'.$botToken.'/sendMessage';
+        $matched = collect($this->telegramRecorder->callsFor('send_message'))
+            ->contains(function (array $call) use ($chatId, $text): bool {
+                if ($call['data']['chat_id'] !== $chatId) {
+                    return false;
+                }
 
-        Http::assertSent(function ($request) use ($fullUrl, $chatId, $text) {
-            if ($request->url() !== $fullUrl) {
-                return false;
-            }
+                if ($text !== null && ($call['data']['text'] ?? null) !== $text) {
+                    return false;
+                }
 
-            if ($request['chat_id'] !== $chatId) {
-                return false;
-            }
+                return true;
+            });
 
-            if ($text !== null && $request['text'] !== $text) {
-                return false;
-            }
-
-            return true;
-        });
+        Assert::assertTrue(
+            $matched,
+            "Expected Telegram message to chat {$chatId}".($text !== null ? " with text '{$text}'" : ''),
+        );
     }
 
     public function assertTelegramMessageContains(string $text): void
     {
-        $telegramUrl = config('telegram.telegram_url');
-        $botToken = config('telegram.telegram_bot_token');
-        $fullUrl = $telegramUrl.'/bot'.$botToken.'/sendMessage';
+        $matched = collect($this->telegramRecorder->callsFor('send_message'))
+            ->contains(function (array $call) use ($text): bool {
+                return str_contains((string) ($call['data']['text'] ?? ''), $text);
+            });
 
-        Http::assertSent(function ($request) use ($fullUrl, $text) {
-            if ($request->url() !== $fullUrl) {
-                return false;
-            }
-
-            return str_contains($request['text'] ?? '', $text);
-        });
+        Assert::assertTrue(
+            $matched,
+            "Expected Telegram message containing '{$text}'",
+        );
     }
 }

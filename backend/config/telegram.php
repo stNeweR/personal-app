@@ -6,6 +6,7 @@ use App\Modules\Pomodoro\Application\Handlers\Command\AddPomodoroSettingsHandler
 use App\Modules\Pomodoro\Application\Handlers\Command\GetPomodoroSettingsHandler;
 use App\Modules\Pomodoro\Application\Handlers\Command\GetTodaySessionsHandler;
 use App\Modules\Pomodoro\Application\Handlers\Command\StartPomodoroHandler;
+use App\Modules\User\Application\Handlers\Command\LinkTelegramHandler;
 use App\Modules\User\Application\Handlers\Command\StartCommandHandler;
 
 return [
@@ -15,10 +16,13 @@ return [
 
     'application_webhook_endpoint' => env('APPLICATION_WEBHOOK_ENDPOINT', ''),
 
+    'webhook_url' => env('TELEGRAM_WEBHOOK_URL', ''),
+
     'telegram_url' => env('TELEGRAM_URL', ''),
 
     'commands_handler' => [
         'start' => StartCommandHandler::class,
+        'register' => LinkTelegramHandler::class,
         'addpomosettings' => AddPomodoroSettingsHandler::class,
         'getpomosettings' => GetPomodoroSettingsHandler::class,
         'startpomodoro' => StartPomodoroHandler::class,
@@ -29,6 +33,10 @@ return [
         [
             'command' => 'start',
             'description' => 'Начать работу с ботом',
+        ],
+        [
+            'command' => 'register',
+            'description' => 'Привязать аккаунт к веб-приложению',
         ],
         [
             'command' => 'addpomosettings',

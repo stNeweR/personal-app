@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 import { DEFAULT_SETTINGS, type PomodoroSettings, toBackendSettings } from '../types/settings'
 import { getUserSettings, saveUserSettings } from '../api/settings'
 import { createSession, deleteSession, getActiveSession, updateSession } from '../api/sessions'
+import { usePlaylistStore } from '@/modules/user/stores/playlistStore'
+import { showPlaylistNotification } from '@/modules/user/composables/usePlaylistNotification'
 
 const SETTINGS_KEY = 'pomodoro_settings'
 
@@ -250,6 +252,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
       await startSessionOnBackend()
       startWork()
       await syncSessionStatus()
+      showPlaylistNotification(usePlaylistStore().url)
     } else if (isRunning.value) {
       pause()
     } else {

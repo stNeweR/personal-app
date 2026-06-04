@@ -1,54 +1,90 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core\Telegram\Infrastructure\Services\Telegram;
 
 use App\Core\Telegram\Domain\Contracts\TelegramApiClientInterface;
 use App\Core\Telegram\Infrastructure\Services\Telegram\DTOs\SendMessageDTO;
 use App\Core\Telegram\Infrastructure\Services\Telegram\DTOs\TelegramApiResponse;
+use App\Modules\Plugin\Domain\Contracts\PluginExecutorInterface;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
 
 final class TelegramApiClient implements TelegramApiClientInterface
 {
-    private string $token;
+    public function __construct(
+        private readonly PluginExecutorInterface $pluginExecutor,
+    ) {}
 
-    private string $telegramUrl;
-
-    private string $telegramApiUrl;
-
-    public function __construct()
+    /**
+     * @return array{bot_token: string, api_url: string}
+     */
+    private function authInput(): array
     {
-        $this->token = Config::string('telegram.telegram_bot_token');
-        $this->telegramUrl = Config::string('telegram.telegram_url');
-        $this->telegramApiUrl = $this->telegramUrl.'/bot'.$this->token;
+        return [
+            'bot_token' => Config::string('telegram.telegram_bot_token'),
+            'api_url' => Config::string('telegram.telegram_url'),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $result
+     */
+    private function responseFromResult(array $result): TelegramApiResponse
+    {
+        $description = $result['description'] ?? null;
+        $descriptionString = match (true) {
+            $description === null => null,
+            is_string($description) => $description,
+            is_scalar($description) => (string) $description,
+            default => null,
+        };
+
+        return new TelegramApiResponse(
+            ok: (bool) ($result['ok'] ?? false),
+            description: $descriptionString,
+            error_code: null,
+        );
     }
 
     public function setWebhook(): TelegramApiResponse
     {
-        $applicationEndpoint = Config::string('app.url').'/'.Config::string('telegram.application_webhook_endpoint');
+        $url = Config::string('telegram.webhook_url');
 
-        $response = Http::timeout(30)->post($this->telegramApiUrl.'/setWebhook', [
-            'url' => $applicationEndpoint,
+        if ($url === '') {
+            $url = Config::string('app.url').'/'.Config::string('telegram.application_webhook_endpoint');
+        }
+
+        $result = $this->pluginExecutor->execute('telegram', 'set_webhook', [
+            ...$this->authInput(),
+            'url' => $url,
         ]);
 
-        return TelegramApiResponse::from($response->json());
+        return $this->responseFromResult($result);
     }
 
     public function sendMessage(SendMessageDTO $dto): TelegramApiResponse
     {
-        $response = Http::timeout(10)->post($this->telegramApiUrl.'/sendMessage', $dto->toArray());
+        $result = $this->pluginExecutor->execute('telegram', 'send_message', [
+            ...$this->authInput(),
+            'chat_id' => $dto->chatId,
+            'text' => $dto->text,
+            'parse_mode' => $dto->parseMode,
+        ]);
 
-        return TelegramApiResponse::from($response->json());
+        return $this->responseFromResult($result);
     }
 
     public function setTelegramCommands(): TelegramApiResponse
     {
+        /** @var list<array<string, string>> $commands */
         $commands = Config::get('telegram.commands_info', []);
 
-        $response = Http::post($this->telegramApiUrl.'/setMyCommands', [
+        $result = $this->pluginExecutor->execute('telegram', 'set_commands', [
+            ...$this->authInput(),
             'commands' => $commands,
         ]);
 
-        return TelegramApiResponse::from($response->json());
+        return $this->responseFromResult($result);
     }
 }

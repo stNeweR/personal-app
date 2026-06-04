@@ -21,32 +21,6 @@ final class GoFfiPluginExecutorTest extends TestCase
         new GoFfiPluginExecutor;
     }
 
-    public function test_real_library_can_execute_converter_plugin(): void
-    {
-        $libraryPath = storage_path('app/plugins/libplugins.so');
-
-        if (! file_exists($libraryPath)) {
-            $this->markTestSkipped('Plugin library not built. Run: task plugin-build');
-        }
-
-        putenv("PLUGIN_SO_PATH={$libraryPath}");
-
-        $executor = new GoFfiPluginExecutor;
-
-        $result = $executor->execute('converter', 'currency', [
-            'amount' => 100,
-            'from' => 'USD',
-            'to' => 'EUR',
-        ]);
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('amount', $result);
-        $this->assertArrayHasKey('from', $result);
-        $this->assertArrayHasKey('to', $result);
-        $this->assertSame('USD', $result['from']);
-        $this->assertSame('EUR', $result['to']);
-    }
-
     public function test_real_library_returns_error_for_unknown_plugin(): void
     {
         $libraryPath = storage_path('app/plugins/libplugins.so');
