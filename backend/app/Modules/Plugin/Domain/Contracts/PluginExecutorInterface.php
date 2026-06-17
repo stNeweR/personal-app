@@ -9,7 +9,7 @@ interface PluginExecutorInterface
     /**
      * Execute a plugin action and return the result array.
      *
-     * @param  string  $name  The plugin name (e.g. "yandex_calendar")
+     * @param  string  $name  The plugin name (e.g. "calendar")
      * @param  string  $action  The action name (e.g. "list_events")
      * @param  array<string, mixed>  $input  JSON-decodable input payload
      * @return array<string, mixed> JSON-decodable response

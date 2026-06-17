@@ -2,8 +2,6 @@
 
 namespace App\Core;
 
-use App\Core\MailNotifier\Domain\Contracts\MailNotifierApiClientInterface;
-use App\Core\MailNotifier\Infrastructure\Services\MailNotifier\MailNotifierApiClient;
 use App\Core\Telegram\Domain\Contracts\TelegramAdapterInterface;
 use App\Core\Telegram\Domain\Contracts\TelegramApiClientInterface;
 use App\Core\Telegram\Infrastructure\Adapters\TelegramAdapter;
@@ -18,7 +16,6 @@ final class CoreServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TelegramAdapterInterface::class, TelegramAdapter::class);
         $this->app->bind(TelegramApiClientInterface::class, TelegramApiClient::class);
-        $this->app->bind(MailNotifierApiClientInterface::class, MailNotifierApiClient::class);
     }
 
     public function boot(): void

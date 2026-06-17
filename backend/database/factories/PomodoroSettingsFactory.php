@@ -5,9 +5,6 @@ namespace Database\Factories;
 use App\Modules\Pomodoro\Infrastructure\Models\PomodoroSettings;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<PomodoroSettings>
- */
 final class PomodoroSettingsFactory extends Factory
 {
     protected $model = PomodoroSettings::class;

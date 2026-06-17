@@ -4,9 +4,6 @@ use App\Core\Telegram\Infrastructure\Http\V1\Controllers\TelegramWebhookControll
 use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\PlaylistController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\TelegramController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\TodoistController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
 use Illuminate\Support\Facades\Route;
@@ -51,28 +48,6 @@ Route::prefix('v1')->group(function () {
         Route::patch('sessions/{id}', [PomodoroController::class, 'updateSession']);
         Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
     });
-
-    Route::middleware('auth:sanctum')->prefix('playlist')->group(function () {
-        Route::get('/', [PlaylistController::class, 'show']);
-        Route::post('/', [PlaylistController::class, 'save']);
-        Route::delete('/', [PlaylistController::class, 'destroy']);
-    });
-
-    Route::middleware('auth:sanctum')->prefix('telegram')->group(function () {
-        Route::get('status', [TelegramController::class, 'status']);
-        Route::post('link-token', [TelegramController::class, 'generateLinkToken']);
-        Route::post('disconnect', [TelegramController::class, 'disconnect']);
-    });
-
-    Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
-        Route::get('status', [NotificationController::class, 'status']);
-        Route::put('channel', [NotificationController::class, 'updateChannel']);
-        Route::put('email', [NotificationController::class, 'updateEmail']);
-        Route::post('email/send-verification', [NotificationController::class, 'sendEmailVerification']);
-    });
-
-    Route::get('notifications/email/verify', [NotificationController::class, 'verifyEmail'])
-        ->name('api.v1.notifications.email.verify');
 
     Route::middleware('auth:sanctum')->prefix('plugins')->group(function () {
         Route::post('{name}/{action}', [PluginController::class, 'execute']);

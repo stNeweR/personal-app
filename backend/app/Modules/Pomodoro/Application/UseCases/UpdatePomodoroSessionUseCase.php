@@ -14,7 +14,6 @@ final readonly class UpdatePomodoroSessionUseCase
 {
     public function __construct(
         private PomodoroSessionsRepositoryInterface $pomodoroSessionsRepository,
-        private NotifyPomodoroPhaseChangeUseCase $notifyPhaseChange,
     ) {}
 
     public function execute(int $sessionId, UpdatePomodoroSessionRequestDTO $data): PomodoroSessionDTO
@@ -26,8 +25,6 @@ final readonly class UpdatePomodoroSessionUseCase
         $phaseStartedAt = $data->phaseStartedAt !== null
             ? Carbon::parse($data->phaseStartedAt)
             : null;
-
-        $oldStatus = $this->pomodoroSessionsRepository->getBySessionId($sessionId)->current_status;
 
         $this->pomodoroSessionsRepository->updateSessionStatus(
             sessionId: $sessionId,
@@ -43,8 +40,6 @@ final readonly class UpdatePomodoroSessionUseCase
         }
 
         $session = $this->pomodoroSessionsRepository->getBySessionId($sessionId);
-
-        $this->notifyPhaseChange->execute($session->user_id, $oldStatus, $session->current_status);
 
         return new PomodoroSessionDTO(
             id: $session->id,
