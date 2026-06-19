@@ -14,7 +14,6 @@ import (
 	_ "personal-app/plugins/mail_notifier"
 	_ "personal-app/plugins/playlist"
 	_ "personal-app/plugins/telegram"
-	_ "personal-app/plugins/todoist"
 	_ "personal-app/plugins/yandex_calendar"
 )
 

@@ -1,0 +1,14 @@
+{
+  "name": "playlist",
+  "version": "1.0.0",
+  "author": "Personal App",
+  "description": "Playlist integration for pomodoro timer",
+  "backend": {
+    "entry": "backend/Plugin.php",
+    "namespace": "Plugins\\Playlist"
+  },
+  "frontend": {
+    "entry": "frontend/index.ts",
+    "widget": "PlaylistWidget"
+  }
+}

@@ -5,9 +5,7 @@ use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\PlaylistController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\TelegramController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\TodoistController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,17 +29,6 @@ Route::prefix('v1')->group(function () {
         Route::get('status', [YandexCalendarController::class, 'status']);
     });
 
-    Route::middleware('auth:sanctum')->prefix('todoist')->group(function () {
-        Route::get('status', [TodoistController::class, 'status']);
-        Route::post('connect', [TodoistController::class, 'connect']);
-        Route::post('disconnect', [TodoistController::class, 'disconnect']);
-        Route::get('tasks', [TodoistController::class, 'index']);
-        Route::post('tasks', [TodoistController::class, 'store']);
-        Route::post('tasks/{id}/complete', [TodoistController::class, 'complete']);
-        Route::post('tasks/{id}/reopen', [TodoistController::class, 'reopen']);
-        Route::delete('tasks/{id}', [TodoistController::class, 'destroy']);
-    });
-
     Route::middleware('auth:sanctum')->prefix('pomodoro')->group(function () {
         Route::get('sessions', [PomodoroController::class, 'today']);
         Route::get('sessions/active', [PomodoroController::class, 'activeSession']);
@@ -50,12 +37,6 @@ Route::prefix('v1')->group(function () {
         Route::post('sessions', [PomodoroController::class, 'createSession']);
         Route::patch('sessions/{id}', [PomodoroController::class, 'updateSession']);
         Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
-    });
-
-    Route::middleware('auth:sanctum')->prefix('playlist')->group(function () {
-        Route::get('/', [PlaylistController::class, 'show']);
-        Route::post('/', [PlaylistController::class, 'save']);
-        Route::delete('/', [PlaylistController::class, 'destroy']);
     });
 
     Route::middleware('auth:sanctum')->prefix('telegram')->group(function () {
@@ -75,6 +56,9 @@ Route::prefix('v1')->group(function () {
         ->name('api.v1.notifications.email.verify');
 
     Route::middleware('auth:sanctum')->prefix('plugins')->group(function () {
-        Route::post('{name}/{action}', [PluginController::class, 'execute']);
+        Route::get('/', [PluginController::class, 'index']);
+        Route::get('enabled', [PluginController::class, 'getEnabledManifests']);
+        Route::post('{name}/enable', [PluginController::class, 'enable']);
+        Route::post('{name}/disable', [PluginController::class, 'disable']);
     });
 });

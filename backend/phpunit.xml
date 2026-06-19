@@ -11,6 +11,10 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Plugins">
+            <directory>../plugins/todoist/backend/Tests</directory>
+            <directory>../plugins/playlist/backend/Tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

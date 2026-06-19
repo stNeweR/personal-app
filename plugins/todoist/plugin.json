@@ -1,0 +1,14 @@
+{
+  "name": "todoist",
+  "version": "1.0.0",
+  "author": "Personal App",
+  "description": "Todoist integration for task management",
+  "backend": {
+    "entry": "backend/Plugin.php",
+    "namespace": "Plugins\\Todoist"
+  },
+  "frontend": {
+    "entry": "frontend/index.ts",
+    "widget": "TodoistWidget"
+  }
+}
