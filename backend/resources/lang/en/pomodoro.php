@@ -63,10 +63,10 @@ return [
     'short_break_started' => 'Short break. Rest for :duration minutes.',
     'pomodoro_completed' => 'Congratulations! You have completed all Pomodoro cycles.',
 
-    // NotifyPomodoroPhaseChangeUseCase (email subject)
+    // Email notification
     'notify_email_subject' => 'Pomodoro — notification',
 
-    // NotifyPomodoroPhaseChangeUseCase (messages)
+    // Phase change notification messages
     'notify_work_complete_short' => '🍅 Work complete! Time for a short break (:duration min).',
     'notify_work_complete_long' => '🍅 Work complete! Time for a long break (:duration min).',
     'notify_break_complete' => '✅ Break complete! Back to work (:duration min).',

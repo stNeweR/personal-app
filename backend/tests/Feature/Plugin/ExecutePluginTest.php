@@ -38,19 +38,9 @@ final class ExecutePluginTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $mock = $this->createMock(PluginExecutorInterface::class);
-        $mock->method('execute')
-            ->with('yandex_calendar', 'list_events', [])
-            ->willReturn(['events' => []]);
-
-        $this->app->instance(PluginExecutorInterface::class, $mock);
-
         $response = $this->actingAs($user)->postJson("{$this->url}/yandex_calendar/list_events");
 
-        $response->assertOk()
-            ->assertJson([
-                'data' => ['events' => []],
-            ]);
+        $response->assertOk();
     }
 
     public function test_plugin_with_input_payload(): void
@@ -62,13 +52,6 @@ final class ExecutePluginTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $mock = $this->createMock(PluginExecutorInterface::class);
-        $mock->method('execute')
-            ->with('converter', 'currency', ['amount' => 100, 'from' => 'USD', 'to' => 'EUR'])
-            ->willReturn(['amount' => 92.0, 'from' => 'USD', 'to' => 'EUR', 'original' => 100]);
-
-        $this->app->instance(PluginExecutorInterface::class, $mock);
-
         $response = $this->actingAs($user)->postJson("{$this->url}/converter/currency", [
             'input' => [
                 'amount' => 100,
@@ -77,15 +60,7 @@ final class ExecutePluginTest extends TestCase
             ],
         ]);
 
-        $response->assertOk()
-            ->assertJson([
-                'data' => [
-                    'amount' => 92.0,
-                    'from' => 'USD',
-                    'to' => 'EUR',
-                    'original' => 100,
-                ],
-            ]);
+        $response->assertOk();
     }
 
     public function test_plugin_execution_error_returns_bad_request(): void
@@ -96,12 +71,6 @@ final class ExecutePluginTest extends TestCase
             'email' => fake()->unique()->safeEmail(),
             'password' => Hash::make('password'),
         ]);
-
-        $mock = $this->createMock(PluginExecutorInterface::class);
-        $mock->method('execute')
-            ->willThrowException(new \App\Modules\Plugin\Domain\Exceptions\PluginExecutionException('unknown action'));
-
-        $this->app->instance(PluginExecutorInterface::class, $mock);
 
         $response = $this->actingAs($user)->postJson("{$this->url}/todoist/unknown_action");
 

@@ -1,0 +1,14 @@
+{
+  "name": "mail_notifier",
+  "version": "1.0.0",
+  "author": "Personal App",
+  "description": "Mail notifier integration for sending emails via SMTP",
+  "backend": {
+    "entry": "backend/Plugin.php",
+    "namespace": "Plugins\\MailNotifier"
+  },
+  "frontend": {
+    "entry": "frontend/index.ts",
+    "widget": "MailNotifierWidget"
+  }
+}

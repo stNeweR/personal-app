@@ -6,6 +6,7 @@ namespace App\Modules\Pomodoro\Application\UseCases;
 
 use App\Modules\Pomodoro\Application\DTOs\PomodoroSessionDTO;
 use App\Modules\Pomodoro\Application\DTOs\UpdatePomodoroSessionRequestDTO;
+use App\Modules\Pomodoro\Application\Events\PomodoroPhaseChangedEvent;
 use App\Modules\Pomodoro\Domain\Enums\PomodoroStatusValue;
 use App\Modules\Pomodoro\Domain\Repository\PomodoroSessionsRepositoryInterface;
 use Carbon\Carbon;
@@ -14,7 +15,6 @@ final readonly class UpdatePomodoroSessionUseCase
 {
     public function __construct(
         private PomodoroSessionsRepositoryInterface $pomodoroSessionsRepository,
-        private NotifyPomodoroPhaseChangeUseCase $notifyPhaseChange,
     ) {}
 
     public function execute(int $sessionId, UpdatePomodoroSessionRequestDTO $data): PomodoroSessionDTO
@@ -44,7 +44,11 @@ final readonly class UpdatePomodoroSessionUseCase
 
         $session = $this->pomodoroSessionsRepository->getBySessionId($sessionId);
 
-        $this->notifyPhaseChange->execute($session->user_id, $oldStatus, $session->current_status);
+        event(new PomodoroPhaseChangedEvent(
+            userId: $session->user_id,
+            oldStatus: $oldStatus->value,
+            newStatus: $session->current_status->value,
+        ));
 
         return new PomodoroSessionDTO(
             id: $session->id,

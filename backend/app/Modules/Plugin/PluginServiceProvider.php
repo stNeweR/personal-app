@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Plugin;
 
 use App\Modules\Plugin\Application\Services\PluginDiscoveryService;
+use App\Modules\Plugin\Domain\Contracts\PluginExecutorInterface;
 use App\Modules\Plugin\Domain\Contracts\PluginInterface;
+use App\Modules\Plugin\Infrastructure\Services\PluginExecutor;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,6 +16,7 @@ final class PluginServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(PluginDiscoveryService::class, PluginDiscoveryService::class);
+        $this->app->singleton(PluginExecutorInterface::class, PluginExecutor::class);
     }
 
     public function boot(): void
