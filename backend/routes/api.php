@@ -6,7 +6,6 @@ use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\TelegramController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -21,12 +20,6 @@ Route::prefix('v1')->group(function () {
             Route::get('me', [AuthController::class, 'me']);
             Route::post('telegram-link-token', [AuthController::class, 'telegramLinkToken']);
         });
-    });
-
-    Route::middleware('auth:sanctum')->prefix('yandex-calendar')->group(function () {
-        Route::post('connect', [YandexCalendarController::class, 'connect']);
-        Route::get('today', [YandexCalendarController::class, 'today']);
-        Route::get('status', [YandexCalendarController::class, 'status']);
     });
 
     Route::middleware('auth:sanctum')->prefix('pomodoro')->group(function () {

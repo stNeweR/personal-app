@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\User\Infrastructure\Http\V1\Controllers;
+namespace Plugins\YandexCalendar\Http\Controllers;
 
 use App\Modules\User\Infrastructure\Models\User;
-use App\Modules\User\Infrastructure\Services\YandexCalendarService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Plugins\YandexCalendar\Http\Requests\ConnectYandexCalendarRequest;
+use Plugins\YandexCalendar\Services\YandexCalendarService;
 
 final class YandexCalendarController
 {
@@ -15,7 +16,7 @@ final class YandexCalendarController
         private readonly YandexCalendarService $calendarService,
     ) {}
 
-    public function connect(Request $request): JsonResponse
+    public function connect(ConnectYandexCalendarRequest $request): JsonResponse
     {
         /** @var User|null $user */
         $user = $request->user();
@@ -25,10 +26,7 @@ final class YandexCalendarController
         }
 
         /** @var array{email: string, app_password: string} $validated */
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-            'app_password' => ['required', 'string'],
-        ]);
+        $validated = $request->validated();
 
         try {
             $this->calendarService->connect($user, $validated['email'], $validated['app_password']);

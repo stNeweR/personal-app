@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Modules\User\Infrastructure\Models;
+declare(strict_types=1);
 
+namespace Plugins\YandexCalendar\Models;
+
+use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
