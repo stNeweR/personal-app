@@ -78,21 +78,6 @@ tasks:
     cmds:
       - docker compose exec app composer update
 
-  plugin-build:
-    desc: Сборка Go-плагинов в shared library
-    cmds:
-      - cd plugins && CGO_ENABLED=1 go build -buildmode=c-shared -o ../backend/storage/app/plugins/libplugins.so -ldflags="-s -w" .
-
-  plugin-test:
-    desc: Тесты Go-плагинов
-    cmds:
-      - cd plugins && go test ./...
-
-  plugin-clean:
-    desc: Очистка скомпилированных плагинов
-    cmds:
-      - rm -f backend/storage/app/plugins/libplugins.so backend/storage/app/plugins/libplugins.h
-
   prep:
     desc: Подготовка перед коммитом
     cmds:

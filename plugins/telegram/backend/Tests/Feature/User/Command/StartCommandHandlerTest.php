@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Feature\User\Command;
+namespace Plugins\Telegram\Tests\Feature\User\Command;
 
 use App\Modules\User\Infrastructure\Models\User;
-use Tests\Assertions\TelegramAssertion;
-use Tests\SetUps\SetupTelegram;
+use Plugins\Telegram\Tests\Assertions\TelegramAssertion;
+use Plugins\Telegram\Tests\SetUps\SetupTelegram;
 use Tests\TestCase;
 
 final class StartCommandHandlerTest extends TestCase

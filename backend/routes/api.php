@@ -1,16 +1,12 @@
 <?php
 
-use App\Core\Telegram\Infrastructure\Http\V1\Controllers\TelegramWebhookController;
 use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\TelegramController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::post('telegram-webhook', [TelegramWebhookController::class, 'handleWebhook']);
-
     Route::prefix('auth')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
@@ -30,12 +26,6 @@ Route::prefix('v1')->group(function () {
         Route::post('sessions', [PomodoroController::class, 'createSession']);
         Route::patch('sessions/{id}', [PomodoroController::class, 'updateSession']);
         Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
-    });
-
-    Route::middleware('auth:sanctum')->prefix('telegram')->group(function () {
-        Route::get('status', [TelegramController::class, 'status']);
-        Route::post('link-token', [TelegramController::class, 'generateLinkToken']);
-        Route::post('disconnect', [TelegramController::class, 'disconnect']);
     });
 
     Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {

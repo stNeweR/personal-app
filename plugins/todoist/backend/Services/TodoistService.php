@@ -103,8 +103,8 @@ final class TodoistService
             $args['priority'] = $priority;
         }
 
-        $tempId = 'tmp-' . Str::uuid()->getHex() . '-' . now()->getTimestampMs();
-        $cmdUuid = Str::uuid()->getHex();
+        $tempId = 'tmp-' . (string) Str::uuid()->getHex() . '-' . now()->getTimestampMs();
+        $cmdUuid = (string) Str::uuid()->getHex();
 
         $result = $this->runCommand($token, 'item_add', $args, $tempId, $cmdUuid);
 
@@ -173,7 +173,7 @@ final class TodoistService
      */
     private function runCommand(string $token, string $commandType, array $args, ?string $tempId = null, ?string $cmdUuid = null): array
     {
-        $cmdUuid ??= Str::uuid()->getHex();
+        $cmdUuid ??= (string) Str::uuid()->getHex();
 
         $command = [
             'type' => $commandType,

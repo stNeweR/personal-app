@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "vite build && mkdir -p ../../public/plugins/mail_notifier/dist && cp dist/mail_notifier.umd.js ../../public/plugins/mail_notifier/dist/"
+    "build": "vite build && mkdir -p ../../public/plugins/mail_notifier/dist && cp dist/mail_notifier.umd.js ../../public/plugins/mail_notifier/dist/",
+    "type-check": "vue-tsc --build --force"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",

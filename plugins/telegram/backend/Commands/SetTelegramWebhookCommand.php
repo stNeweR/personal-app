@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Core\Telegram\Infrastructure\Console;
+declare(strict_types=1);
+
+namespace Plugins\Telegram\Commands;
 
 use App\Core\Telegram\Application\UseCases\SetTelegramWebhookUseCase;
 use App\Core\Telegram\Domain\Exceptions\SetWebhookException;

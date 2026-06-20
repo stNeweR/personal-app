@@ -21,9 +21,6 @@ services:
     volumes:
       - ./backend:/var/www
       - ./plugins:/var/www/plugins
-      - ./_docker/dev/php/ffi.ini:/usr/local/etc/php/conf.d/ffi.ini:ro
-    environment:
-      - PLUGIN_SO_PATH=/var/www/storage/app/plugins/libplugins.so
     container_name: bot_app
     depends_on:
       - db

@@ -1,0 +1,14 @@
+{
+  "name": "telegram",
+  "version": "1.0.0",
+  "author": "Personal App",
+  "description": "Telegram bot integration and Pomodoro notifications",
+  "backend": {
+    "entry": "backend/Plugin.php",
+    "namespace": "Plugins\\Telegram"
+  },
+  "frontend": {
+    "entry": "frontend/index.ts",
+    "widget": "TelegramNotifierWidget"
+  }
+}
