@@ -6,7 +6,9 @@ namespace App\Modules\Plugin\Infrastructure\Http\V1\Controllers;
 
 use App\Modules\Plugin\Application\Services\PluginDiscoveryService;
 use App\Modules\Plugin\Infrastructure\Models\Plugin;
+use App\Modules\User\Domain\Enums\Plan;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 final class PluginController
 {
@@ -34,8 +36,23 @@ final class PluginController
         return response()->json(['data' => $plugins]);
     }
 
-    public function enable(string $name): JsonResponse
+    public function enable(Request $request, string $name): JsonResponse
     {
+        /** @var \App\Modules\User\Infrastructure\Models\User|null $user */
+        $user = $request->user();
+        $plan = $user?->plan ?? Plan::Junior;
+
+        if ($plan === Plan::Junior) {
+            return response()->json(['message' => 'План Junior не позволяет активировать плагины. Поменяйте план.'], 403);
+        }
+
+        if ($plan === Plan::Middle) {
+            $enabledCount = Plugin::where('enabled', true)->count();
+            if ($enabledCount >= 2) {
+                return response()->json(['message' => 'План Middle позволяет активировать максимум 2 плагина. Поменяйте план.'], 403);
+            }
+        }
+
         $plugin = Plugin::where('name', $name)->firstOrFail();
         $plugin->update(['enabled' => true]);
 

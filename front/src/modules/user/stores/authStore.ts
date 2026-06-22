@@ -5,8 +5,9 @@ import {
   register as registerApi,
   logout as logoutApi,
   me as meApi,
+  updatePlan as updatePlanApi,
 } from '../api/auth'
-import type { AuthResponse, LoginPayload, RegisterPayload, User } from '../types/auth'
+import type { AuthResponse, LoginPayload, Plan, RegisterPayload, User } from '../types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'))
@@ -71,6 +72,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function changePlan(plan: Plan): Promise<void> {
+    try {
+      user.value = await updatePlanApi(plan)
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Failed to change plan'
+      throw e
+    }
+  }
+
   return {
     token,
     user,
@@ -81,5 +91,6 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    changePlan,
   }
 })

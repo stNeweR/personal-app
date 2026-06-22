@@ -7,6 +7,7 @@ import { usePomodoroStore } from '@/modules/pomodoro/stores/pomodoroStore'
 import PomodoroSettingsModal from '@/modules/pomodoro/components/PomodoroSettingsModal.vue'
 import type { PomodoroSettings } from '@/modules/pomodoro/types/settings'
 import type { PomodoroSession } from '@/modules/pomodoro/types/session'
+import type { Plan } from '../types/auth'
 import { pluginRegistry } from '@/shared/plugins/PluginRegistry'
 
 const router = useRouter()
@@ -21,6 +22,32 @@ const showSettings = ref(false)
 const settingsChecked = ref(false)
 
 const pluginWidgets = computed(() => pluginRegistry.getWidgets())
+
+const planOptions: { value: Plan; label: string; description: string; icon: string }[] = [
+  { value: 'junior', label: 'Junior', description: 'Только помодоро таймер', icon: '🌱' },
+  { value: 'middle', label: 'Middle', description: 'До 2 плагинов', icon: '⚡' },
+  { value: 'senior', label: 'Senior', description: 'Безлимитные плагины', icon: '🚀' },
+]
+
+const changingPlan = ref(false)
+
+async function handleChangePlan(plan: Plan): Promise<void> {
+  if (auth.user?.plan === plan) return
+
+  const planLabel = planOptions.find(p => p.value === plan)?.label ?? plan
+  if (!confirm(`Переключиться на план ${planLabel}?${plan === 'junior' ? '\n\nАктивные плагины будут отключены. Данные плагинов сохранятся.' : ''}`)) {
+    return
+  }
+
+  changingPlan.value = true
+  try {
+    await auth.changePlan(plan)
+  } catch {
+    // error is set in store
+  } finally {
+    changingPlan.value = false
+  }
+}
 
 onMounted(async () => {
   if (!auth.user) {
@@ -125,6 +152,53 @@ function statusColor(status: string): string {
 
     <!-- Content -->
     <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+      <!-- Plan Selector -->
+      <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-800">📋 Ваш план: {{ auth.user?.plan ? planOptions.find(p => p.value === auth.user?.plan)?.label ?? auth.user.plan : 'Junior' }}</h3>
+          <p class="text-sm text-gray-500 mt-1">
+            Выберите план для управления доступом к плагинам
+          </p>
+        </div>
+
+        <div v-if="auth.error" class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+          {{ auth.error }}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            v-for="option in planOptions"
+            :key="option.value"
+            :class="[
+              'rounded-xl p-5 border-2 transition cursor-pointer',
+              auth.user?.plan === option.value
+                ? 'border-accent-purple bg-accent-purple/5'
+                : 'border-gray-200 hover:border-gray-300 bg-white',
+            ]"
+            @click="handleChangePlan(option.value)"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">{{ option.icon }}</span>
+              <span
+                v-if="auth.user?.plan === option.value"
+                class="px-2 py-0.5 rounded-full text-xs font-medium bg-accent-purple text-white"
+              >
+                Текущий
+              </span>
+            </div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">{{ option.label }}</h4>
+            <p class="text-sm text-gray-500">{{ option.description }}</p>
+            <button
+              v-if="auth.user?.plan !== option.value"
+              :disabled="changingPlan"
+              class="mt-4 w-full px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
+            >
+              {{ changingPlan ? 'Смена...' : 'Выбрать' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Pomodoro Settings Section -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="flex items-center justify-between mb-6 flex-wrap gap-4">

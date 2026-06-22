@@ -4,6 +4,7 @@ use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
+use App\Modules\User\Infrastructure\Http\V1\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -43,5 +44,9 @@ Route::prefix('v1')->group(function () {
         Route::get('enabled', [PluginController::class, 'getEnabledManifests']);
         Route::post('{name}/enable', [PluginController::class, 'enable']);
         Route::post('{name}/disable', [PluginController::class, 'disable']);
+    });
+
+    Route::middleware('auth:sanctum')->prefix('user')->group(function () {
+        Route::put('plan', [UserController::class, 'updatePlan']);
     });
 });

@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/api/client'
 import type {
   AuthResponse,
   LoginPayload,
+  Plan,
   RegisterPayload,
   TelegramLinkTokenResponse,
   User,
@@ -34,5 +35,12 @@ export function me(): Promise<User> {
 export function generateTelegramLinkToken(): Promise<TelegramLinkTokenResponse> {
   return apiClient<TelegramLinkTokenResponse>('/api/v1/auth/telegram-link-token', {
     method: 'POST',
+  })
+}
+
+export function updatePlan(plan: Plan): Promise<User> {
+  return apiClient<User>('/api/v1/user/plan', {
+    method: 'PUT',
+    body: { plan },
   })
 }
