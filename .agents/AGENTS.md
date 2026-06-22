@@ -6,7 +6,7 @@
 - Основные пользователи: `Один программист, в будущем могут быть простые люди`
 - Стадия жизненного цикла: `prototype`
 - Основная ветка: `dev`
-- Важные заметки о состоянии репозитория: `active refactor and make features. The project mainly works with third-party services, rather than doing anything itself. `
+- Важные заметки о состоянии репозитория: `Active refactor. PHP-only plugin system, no Go code. Plugin-based architecture for Telegram, mail notifications, Todoist, Yandex Calendar, Playlist.`
 
 ---
 
@@ -70,9 +70,9 @@
 
 ## Архитектура
 
-- Архитектурный стиль: `Modular monolith with clean architecture modules`
-- Высокоуровневое описание: `Each business capability owns its API layer, application logic, domain rules, and persistence adapters`
-- Основные модули / bounded contexts: `pomodoro, user`
+- Архитектурный стиль: `Modular monolith with clean architecture modules + plugin system`
+- Высокоуровневое описание: `Each business capability owns its API layer, application logic, domain rules, and persistence adapters. Cross-cutting features (Telegram, email, Todoist, etc.) are delivered via PHP plugins.`
+- Основные модули / bounded contexts: `pomodoro, user, plugin`
 - Основной поток данных: `request -> route -> controller -> application service -> domain -> repository -> response mapper`
 
 ### Архитектурные Правила
@@ -80,58 +80,93 @@
 - Модули должны быть независимы от модуля `User`
 - Все модули должны следовать архитектуре `clean architecture`
 - Нельзя обходить `domain layer` ради удобства.
+- Кросс-модульная функциональность (Telegram, email уведомления, Todoist, Yandex Calendar) реализуется через плагины, а не через core.
+- Плагины используют PHP interfaces из core (`TelegramAdapterInterface`, `TelegramApiClientInterface`), но сами регистрируют routes, events и bindings в своём `Plugin::boot()`.
 
 ### Структура Модуля
 
 ```
-src/app/Modules/<Module>/
-├── Application/           # Use cases, DTOs, Validators
-├── Domain/                # Entities, Value Objects, Repository Interfaces
-├── Infrastructure/        # Repository Implementations, External Services
+app/Modules/<Module>/
+├── Application/           # Use cases, DTOs, Events, Handlers
+├── Domain/                # Entities, Enums, Value Objects, Repository Interfaces
+├── Infrastructure/        # Repository Implementations, Controllers, Models, Adapters
 └── <Module>ServiceProvider.php
+```
+
+### Структура Плагина
+
+```
+plugins/<plugin_name>/
+├── plugin.json            # Манифест (name, version, backend entry, frontend widget)
+├── package.json           # Build config для frontend (Vite → UMD)
+├── vite.config.ts         # Vite конфиг
+├── frontend/
+│   ├── index.ts           # Entry point (re-export widget)
+│   ├── api/               # API клиент плагина
+│   └── components/        # Vue-компоненты виджета
+└── backend/
+    ├── Plugin.php         # Entry point: register() + boot() (autoloader, config, routes, events, bindings)
+    ├── Config/            # Конфигурация плагина
+    ├── Routes/routes.php  # API маршруты плагина
+    ├── Http/Controllers/  # Контроллеры плагина
+    ├── Services/          # Бизнес-логика плагина
+    ├── Models/            # Модели Eloquent плагина
+    ├── Migrations/        # Миграции плагина
+    └── Tests/             # Тесты плагина
 ```
 
 ## Структура Репозитория
 
 ```text
-src/                       # Backend (Laravel)
+backend/                   # Backend (Laravel)
 ├── app/
-│   ├── Core/              # Общие модули (Telegram и др.)
+│   ├── Core/              # Общая инфраструктура (Telegram DTO/Interfaces, MailNotifier)
 │   └── Modules/
-│       ├── Pomodoro/      # Помодоро-таймер
-│       └── User/          # Управление пользователями
+│       ├── Plugin/        # Плагин-система (Discovery, Executor, ServiceProvider)
+│       ├── Pomodoro/      # Помодоро-таймер (timer, sessions, settings)
+│       └── User/          # Управление пользователями (auth, plan/subscriptions)
+├── config/
+│   └── telegram.php       # Telegram конфиг (fallback для плагина)
 ├── database/
 │   ├── migrations/        # Миграции БД
 │   ├── seeders/           # Сидеры
 │   └── factories/         # Фабрики для тестов
+├── routes/
+│   └── api.php            # API маршруты (auth, pomodoro, plugins, notifications, user/plan)
 ├── tests/
+│   ├── Assertions/        # Тест-ассерты (TelegramAssertion)
+│   ├── Doubles/           # Тест-дублёры (RecordingTelegramApiClient)
+│   ├── SetUps/            # Тест setup traits (SetupTelegram)
 │   ├── Feature/           # Feature-тесты по модулям
 │   └── Unit/              # Unit-тесты
 └── _docker/
-    ├── dev/               # Dev-окружение
-    └── prod/              # Production-окружение
+    └── dev/               # Dev-окружение (php, node, nginx)
+
+plugins/                   # PHP-плагины
+├── mail_notifier/         # Email уведомления (SMTP, верификация)
+├── telegram/              # Telegram бот + Pomodoro уведомления
+├── todoist/               # Todoist интеграция
+├── yandex_calendar/       # Yandex Calendar (CalDAV)
+└── playlist/              # Плейлист для помодоро
 
 front/                     # Frontend (Vue 3 SPA)
 ├── src/
-│   ├── modules/           # Модули фронтенда (pomodoro, user, ...)
-│   │   └── <Module>/
-│   │       ├── api/       # API-клиент, запросы к backend
-│   │       ├── components/# Vue-компоненты модуля
-│   │       ├── composables/# Переиспользуемая логика (useXxx)
-│   │       ├── pages/     # Страницы/вьюхи модуля
-│   │       ├── router/    # Роуты модуля
-│   │       ├── stores/    # Pinia-сторы модуля
-│   │       └── types/     # TypeScript типы модуля
-│   ├── shared/            # Общий код между модулями
-│   │   ├── components/    # Переиспользуемые UI-компоненты
-│   │   ├── composables/   # Общие composables
-│   │   ├── utils/         # Утилиты, хелперы
-│   │   └── types/         # Глобальные типы
+│   ├── modules/           # Модули фронтенда
+│   │   ├── pomodoro/      # Pomodoro таймер (settings, sessions, timer)
+│   │   └── user/          # Auth, dashboard, plugins page
+│   │       ├── api/       # API-клиент (auth.ts)
+│   │       ├── composables/ # usePluginManagement
+│   │       ├── pages/     # LoginPage, RegisterPage, DashboardPage, PluginsPage
+│   │       ├── router/    # authRoutes.ts
+│   │       ├── stores/    # authStore, pomodoroStore, playlistStore
+│   │       └── types/     # auth.ts (User, Plan, AuthResponse)
+│   ├── shared/
+│   │   ├── api/           # Общий API клиент (client.ts)
+│   │   ├── components/    # AppLayout.vue
+│   │   └── plugins/       # PluginRegistry.ts (динамическая загрузка виджетов)
 │   ├── App.vue
 │   ├── main.ts
-│   └── router/
-│       └── index.ts       # Корневой роутер (объединяет модули)
-├── public/
+│   └── router/index.ts
 └── package.json
 ```
 
@@ -180,6 +215,7 @@ docker compose -f docker-compose.prod.yml up -d
 | --- | --- | --- |
 | nginx | 3000 | Веб-сервер |
 | app | - | PHP/Laravel приложение |
+| node | 5173 | Vite dev server (frontend) |
 | db | 5434 | PostgreSQL |
 
 ---
@@ -202,13 +238,15 @@ docker compose -f docker-compose.prod.yml up -d
 
 - **Фреймворк**: PHPUnit
 - **Команда**: `task test`
-- **Расположение**: `src/tests/Feature/<Module>/`, `src/tests/Unit/<Module>/`
+- **Расположение**: `backend/tests/Feature/<Module>/`, `backend/tests/Unit/<Module>/`
+- **Тесты плагинов**: `plugins/<name>/backend/Tests/`
 
 ### Правила
 
 - Писать тесты для новой функциональности
 - Обновлять тесты при изменении поведения
 - Feature-тесты группируются по модулям
+- Тестовые doubles (RecordingTelegramApiClient) и traits (SetupTelegram, TelegramAssertion) — в `backend/tests/`
 
 ---
 
@@ -217,6 +255,57 @@ docker compose -f docker-compose.prod.yml up -d
 - **Формат ответов**: JSON
 - **DTO**: Использовать `spatie/laravel-data` для запросов и ответов
 - **Обработка ошибок**: Стандартные Laravel HTTP статусы
+- **Версионирование**: `/api/v1/...`
+
+### Основные эндпоинты
+
+```
+# Auth
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+GET    /api/v1/auth/me
+
+# Pomodoro
+GET    /api/v1/pomodoro/settings
+POST   /api/v1/pomodoro/settings
+GET    /api/v1/pomodoro/sessions
+GET    /api/v1/pomodoro/sessions/active
+POST   /api/v1/pomodoro/sessions
+PATCH  /api/v1/pomodoro/sessions/{id}
+DELETE /api/v1/pomodoro/sessions/{id}
+
+# Plugins
+GET    /api/v1/plugins/
+GET    /api/v1/plugins/enabled
+POST   /api/v1/plugins/{name}/enable
+POST   /api/v1/plugins/{name}/disable
+
+# User
+PUT    /api/v1/user/plan
+
+# Telegram webhook (registered by telegram plugin)
+POST   /api/v1/telegram-webhook
+```
+
+---
+
+## Система подписок
+
+Три плана, определяют доступ к плагинам:
+
+| План | Enum | Помодоро | Плагины |
+|------|------|----------|---------|
+| `junior` | `Plan::Junior` | Да | 0 (кнопки серые, alert "Поменяйте план") |
+| `middle` | `Plan::Middle` | Да | до 2 |
+| `senior` | `Plan::Senior` | Да | без ограничений |
+
+- Enum: `backend/app/Modules/User/Domain/Enums/Plan.php` (с методами `pluginLimit()`, `label()`)
+- БД: строковое поле `plan` в `users` с default `'junior'`
+- Модель User кастует в enum: `'plan' => Plan::class`
+- При смене на junior — автоматическое отключение всех плагинов (данные/токены сохраняются)
+- При смене на middle — отключение лишних плагинов (самые старые)
+- Фронтенд: блок выбора плана в DashboardPage, ограничения в PluginsPage
 
 ---
 
@@ -227,6 +316,7 @@ docker compose -f docker-compose.prod.yml up -d
 - **Модульная архитектура**: Каждый bounded context (pomodoro, user и т.д.) — отдельный модуль в `src/modules/<Module>/`.
 - **Модули изолированы**: Модуль не импортирует внутренности другого модуля напрямую. Общение через `shared/`.
 - **Composition API + `<script setup lang="ts">`**: Единственный стиль написания компонентов.
+- **Плагинские виджеты**: Динамически загружаются через `PluginRegistry` и рендерятся на DashboardPage через `<component :is="widget.component" />`.
 
 ### Структура Модуля
 
@@ -239,6 +329,11 @@ src/modules/<Module>/
 ├── router/                # Роуты модуля (экспортируются и регистрируются в корневом router)
 ├── stores/                # Pinia stores модуля
 └── types/                 # TypeScript интерфейсы и типы модуля
+
+# Примеры:
+src/modules/user/types/auth.ts     — User, Plan, AuthResponse, LoginPayload, RegisterPayload
+src/modules/user/stores/authStore.ts — login, register, logout, fetchUser, changePlan
+src/modules/user/api/auth.ts       — login, register, logout, me, generateTelegramLinkToken, updatePlan
 ```
 
 ### Правила
@@ -247,8 +342,9 @@ src/modules/<Module>/
 - **Стили**: TailwindCSS. Избегать inline-стилей и scoped CSS, если можно обойтись utility-классами.
 - **Сторы**: Одна доменная область — один Pinia store. Использовать setup-стиль сторов.
 - **Типизация**: Всё типизировать строго. Никаких `any` без крайней необходимости.
-- **API**: Централизовать вызовы backend в `api/` каждого модуля. Использовать `fetch` или `axios` (если добавлен).
+- **API**: Централизовать вызовы backend в `api/` каждого модуля. Использовать `apiClient` из `shared/api/client.ts`.
 - **Роутер**: Каждый модуль экспортирует свои роуты; корневой `router/index.ts` импортирует и объединяет их.
+- **Enum типы**: Использовать `type` (не `interface`) для union-типов (например, `type Plan = 'junior' | 'middle' | 'senior'`).
 
 ---
 
@@ -267,10 +363,10 @@ You are an expert in Laravel, PHP, and related web development technologies.
   Dependencies
   - Composer for dependency management
   - PHP 8.3+
-  - Laravel 11.0+
+  - Laravel 12+
 
   PHP and Laravel Standards
-  - Leverage PHP 8.3+ features when appropriate (e.g., typed properties, match expressions).
+  - Leverage PHP 8.3+ features when appropriate (e.g., typed properties, match expressions, backed enums).
   - Adhere to PSR-12 coding standards for consistent code style.
   - Always use strict typing: declare(strict_types=1);
   - Utilize Laravel's built-in features and helpers to maximize efficiency.
@@ -284,27 +380,24 @@ You are an expert in Laravel, PHP, and related web development technologies.
   - Utilize Laravel's Eloquent ORM for database interactions.
   - Use Laravel's query builder for complex database operations.
   - Create and maintain proper database migrations and seeders.
-
+  - Use backed enums (e.g., `Plan::Junior`) for domain constants instead of raw strings.
 
   Laravel Best Practices
   - Use Eloquent ORM and Query Builder over raw SQL queries when possible
   - Implement Repository and Service patterns for better code organization and reusability
   - Utilize Laravel's built-in authentication and authorization features (Sanctum, Policies)
   - Leverage Laravel's caching mechanisms (Redis, Memcached) for improved performance
-  - Use job queues and Laravel Horizon for handling long-running tasks and background processing
-  - Implement comprehensive testing using PHPUnit and Laravel Dusk for unit, feature, and browser tests
+  - Implement comprehensive testing using PHPUnit for unit and feature tests
   - Use API resources and versioning for building robust and maintainable APIs
   - Implement proper error handling and logging using Laravel's exception handler and logging facade
   - Utilize Laravel's validation features, including Form Requests, for data integrity
   - Implement database indexing and use Laravel's query optimization features for better performance
-  - Use Laravel Telescope for debugging and performance monitoring in development
-  - Leverage Laravel Nova or Filament for rapid admin panel development
   - Implement proper security measures, including CSRF protection, XSS prevention, and input sanitization
 
   Code Architecture
     * Naming Conventions:
       - Use consistent naming conventions for folders, classes, and files.
-      - Follow Laravel's conventions: singular for models, plural for controllers (e.g., User.php, UsersController.php).
+      - Follow Laravel's conventions: singular for models, plural for controllers.
       - Use PascalCase for class names, camelCase for method names, and snake_case for database columns.
     * Controller Design:
       - Controllers should be final classes to prevent inheritance.
@@ -312,40 +405,29 @@ You are an expert in Laravel, PHP, and related web development technologies.
       - Avoid injecting dependencies directly into controllers. Instead, use method injection or service classes.
     * Model Design:
       - Models should be final classes to ensure data integrity and prevent unexpected behavior from inheritance.
+      - Use backed enums for domain constants (e.g., `Plan::class` in casts).
     * Services:
       - Create a Services folder within the app directory.
-      - Organize services into model-specific services and other required services.
       - Service classes should be final and read-only.
       - Use services for complex business logic, keeping controllers thin.
-    * Routing:
-      - Maintain consistent and organized routes.
-      - Create separate route files for each major model or feature area.
-      - Group related routes together (e.g., all user-related routes in routes/user.php).
+    * Plugin System:
+      - Cross-cutting features are delivered via PHP plugins in `plugins/<name>/`.
+      - Each plugin has a `Plugin.php` implementing `PluginInterface` with `register()` and `boot()` methods.
+      - Plugins register their own routes, event listeners, container bindings, and artisan commands in `boot()`.
+      - Plugin migrations are auto-discovered from `plugins/*/backend/Migrations/`.
+      - Frontend widgets are loaded dynamically via `PluginRegistry` and rendered on the dashboard.
     * Type Declarations:
       - Always use explicit return type declarations for methods and functions.
       - Use appropriate PHP type hints for method parameters.
-      - Leverage PHP 8.3+ features like union types and nullable types when necessary.
-    * Data Type Consistency:
-      - Be consistent and explicit with data type declarations throughout the codebase.
-      - Use type hints for properties, method parameters, and return types.
-      - Leverage PHP's strict typing to catch type-related errors early.
-    * Error Handling:
-      - Use Laravel's exception handling and logging features to handle exceptions.
-      - Create custom exceptions when necessary.
-      - Use try-catch blocks for expected exceptions.
-      - Handle exceptions gracefully and return appropriate responses.
+      - Leverage PHP 8.3+ features like union types, nullable types, and backed enums.
 
   Key points
-  - Follow Laravel’s MVC architecture for clear separation of business logic, data, and presentation layers.
+  - Follow Laravel's architecture for clear separation of business logic, data, and presentation layers.
   - Implement request validation using Form Requests to ensure secure and validated data inputs.
-  - Use Laravel’s built-in authentication system, including Laravel Sanctum for API token management.
+  - Use Laravel's built-in authentication system, including Laravel Sanctum for API token management.
   - Ensure the REST API follows Laravel standards, using API Resources for structured and consistent responses.
-  - Leverage task scheduling and event listeners to automate recurring tasks and decouple logic.
-  - Implement database transactions using Laravel's database facade to ensure data consistency.
+  - Leverage event listeners and plugin hooks to decouple cross-cutting logic.
   - Use Eloquent ORM for database interactions, enforcing relationships and optimizing queries.
-  - Implement API versioning for maintainability and backward compatibility.
-  - Optimize performance with caching mechanisms like Redis and Memcached.
-  - Ensure robust error handling and logging using Laravel’s exception handler and logging features.
+  - Implement proper error handling and logging using Laravel's exception handler and logging features.
 
 ---
-
