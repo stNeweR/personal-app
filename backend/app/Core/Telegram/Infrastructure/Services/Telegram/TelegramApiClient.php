@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Core\Telegram\Infrastructure\Services\Telegram;
 
 use App\Core\Telegram\Domain\Contracts\TelegramApiClientInterface;

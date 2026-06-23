@@ -3,9 +3,23 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import { getTodaySessions } from '@/modules/pomodoro/api/sessions'
+<<<<<<< HEAD
+import { getCalendarStatus, connectYandexCalendar, getTodayEvents } from '../api/calendar'
+import {
+  getTodoistStatus,
+  connectTodoist,
+  disconnectTodoist,
+  getTodoistTasks,
+  createTodoistTask,
+  completeTodoistTask,
+  reopenTodoistTask,
+  deleteTodoistTask,
+} from '../api/todoist'
+=======
 import { usePomodoroStore } from '@/modules/pomodoro/stores/pomodoroStore'
 import PomodoroSettingsModal from '@/modules/pomodoro/components/PomodoroSettingsModal.vue'
 import type { PomodoroSettings } from '@/modules/pomodoro/types/settings'
+>>>>>>> course
 import type { PomodoroSession } from '@/modules/pomodoro/types/session'
 import type { Plan } from '../types/auth'
 import { pluginRegistry } from '@/shared/plugins/PluginRegistry'
@@ -17,6 +31,37 @@ const sessions = ref<PomodoroSession[]>([])
 const sessionsLoading = ref(false)
 const sessionsError = ref<string | null>(null)
 
+<<<<<<< HEAD
+const calendarStatus = ref<{ connected: boolean } | null>(null)
+const calendarLoading = ref(false)
+const calendarEvents = ref<CalendarEvent[]>([])
+const calendarError = ref<string | null>(null)
+
+const showConnectForm = ref(false)
+const yandexEmail = ref('')
+const yandexPassword = ref('')
+const connectLoading = ref(false)
+
+const todoistConnected = ref(false)
+const todoistLoading = ref(false)
+const todoistTasks = ref<TodoistTask[]>([])
+const todoistError = ref<string | null>(null)
+const showTodoistConnectForm = ref(false)
+const todoistApiToken = ref('')
+const todoistConnectLoading = ref(false)
+
+const showCreateTodoistForm = ref(false)
+const newTaskContent = ref('')
+const newTaskDescription = ref('')
+const newTaskPriority = ref(1)
+const createTaskLoading = ref(false)
+const mutatingTaskId = ref<string | null>(null)
+
+const todoistActiveCount = computed(() => todoistTasks.value.filter((t) => !t.checked).length)
+const todoistCompletedCount = computed(() => todoistTasks.value.filter((t) => t.checked).length)
+
+onMounted(() => {
+=======
 const pomodoro = usePomodoroStore()
 const showSettings = ref(false)
 const settingsChecked = ref(false)
@@ -50,13 +95,19 @@ async function handleChangePlan(plan: Plan): Promise<void> {
 }
 
 onMounted(async () => {
+>>>>>>> course
   if (!auth.user) {
     auth.fetchUser()
   }
   loadSessions()
+<<<<<<< HEAD
+  loadCalendarStatus()
+  loadTodoistStatus()
+=======
   await pomodoro.loadUserSettings()
   settingsChecked.value = true
   await pluginRegistry.loadPlugins()
+>>>>>>> course
 })
 
 async function loadSessions() {
@@ -72,6 +123,167 @@ async function loadSessions() {
   }
 }
 
+<<<<<<< HEAD
+async function loadCalendarStatus() {
+  try {
+    calendarStatus.value = await getCalendarStatus()
+    if (calendarStatus.value?.connected) {
+      await loadCalendarEvents()
+    }
+  } catch {
+    // ignore
+  }
+}
+
+async function handleConnectYandex() {
+  connectLoading.value = true
+  calendarError.value = null
+  try {
+    await connectYandexCalendar({
+      email: yandexEmail.value,
+      app_password: yandexPassword.value,
+    })
+    showConnectForm.value = false
+    yandexEmail.value = ''
+    yandexPassword.value = ''
+    await loadCalendarStatus()
+  } catch (e) {
+    calendarError.value = e instanceof Error ? e.message : 'Failed to connect Yandex Calendar'
+  } finally {
+    connectLoading.value = false
+  }
+}
+
+async function loadCalendarEvents() {
+  calendarLoading.value = true
+  calendarError.value = null
+  try {
+    const today = new Date().toLocaleDateString('en-CA')
+    const res = await getTodayEvents(today)
+    calendarEvents.value = res.data
+  } catch (e) {
+    calendarError.value = e instanceof Error ? e.message : 'Failed to load calendar'
+  } finally {
+    calendarLoading.value = false
+  }
+}
+
+async function loadTodoistStatus() {
+  try {
+    const status = await getTodoistStatus()
+    todoistConnected.value = status.connected
+    if (status.connected) {
+      await loadTodoistTasks()
+    }
+  } catch {
+    // ignore
+  }
+}
+
+async function handleConnectTodoist() {
+  todoistConnectLoading.value = true
+  todoistError.value = null
+  try {
+    await connectTodoist({ api_token: todoistApiToken.value })
+    showTodoistConnectForm.value = false
+    todoistApiToken.value = ''
+    await loadTodoistStatus()
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to connect Todoist'
+  } finally {
+    todoistConnectLoading.value = false
+  }
+}
+
+async function handleDisconnectTodoist() {
+  todoistConnectLoading.value = true
+  todoistError.value = null
+  try {
+    await disconnectTodoist()
+    todoistTasks.value = []
+    todoistConnected.value = false
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to disconnect Todoist'
+  } finally {
+    todoistConnectLoading.value = false
+  }
+}
+
+async function loadTodoistTasks() {
+  todoistLoading.value = true
+  todoistError.value = null
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const res = await getTodoistTasks(timezone)
+    todoistTasks.value = res.data
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to load Todoist tasks'
+  } finally {
+    todoistLoading.value = false
+  }
+}
+
+async function handleCreateTodoistTask() {
+  if (!newTaskContent.value.trim()) return
+  createTaskLoading.value = true
+  todoistError.value = null
+  try {
+    await createTodoistTask({
+      content: newTaskContent.value.trim(),
+      description: newTaskDescription.value.trim() || undefined,
+      priority: newTaskPriority.value,
+    })
+    newTaskContent.value = ''
+    newTaskDescription.value = ''
+    newTaskPriority.value = 1
+    showCreateTodoistForm.value = false
+    await loadTodoistTasks()
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to create task'
+  } finally {
+    createTaskLoading.value = false
+  }
+}
+
+async function handleCompleteTodoistTask(task: TodoistTask) {
+  mutatingTaskId.value = task.id
+  todoistError.value = null
+  try {
+    await completeTodoistTask(task.id)
+    await loadTodoistTasks()
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to complete task'
+  } finally {
+    mutatingTaskId.value = null
+  }
+}
+
+async function handleReopenTodoistTask(task: TodoistTask) {
+  mutatingTaskId.value = task.id
+  todoistError.value = null
+  try {
+    await reopenTodoistTask(task.id)
+    await loadTodoistTasks()
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to reopen task'
+  } finally {
+    mutatingTaskId.value = null
+  }
+}
+
+async function handleDeleteTodoistTask(task: TodoistTask) {
+  if (!confirm(`Удалить задачу «${task.content}»?`)) return
+  mutatingTaskId.value = task.id
+  todoistError.value = null
+  try {
+    await deleteTodoistTask(task.id)
+    await loadTodoistTasks()
+  } catch (e) {
+    todoistError.value = e instanceof Error ? e.message : 'Failed to delete task'
+  } finally {
+    mutatingTaskId.value = null
+  }
+=======
 function openPomodoroSettings(): void {
   showSettings.value = true
 }
@@ -87,6 +299,7 @@ async function savePomodoroSettings(settings: PomodoroSettings): Promise<void> {
 
 function handleGoToTimer(): void {
   router.push('/timer')
+>>>>>>> course
 }
 
 async function handleLogout() {
@@ -152,6 +365,29 @@ function statusColor(status: string): string {
 
     <!-- Content -->
     <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+<<<<<<< HEAD
+      <!-- Calendar Section -->
+      <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <h3 class="text-xl font-bold text-gray-800">Календарь на сегодня</h3>
+          <div v-if="calendarStatus">
+            <button
+              v-if="!calendarStatus.connected"
+              @click="showConnectForm = true"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium shadow hover:opacity-90 transition"
+            >
+              Подключить Яндекс Календарь
+            </button>
+            <button
+              v-else
+              @click="loadCalendarEvents"
+              :disabled="calendarLoading"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
+            >
+              {{ calendarLoading ? 'Загрузка...' : 'Обновить' }}
+            </button>
+          </div>
+=======
       <!-- Plan Selector -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="mb-6">
@@ -163,6 +399,7 @@ function statusColor(status: string): string {
 
         <div v-if="auth.error" class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
           {{ auth.error }}
+>>>>>>> course
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -255,6 +492,22 @@ function statusColor(status: string): string {
         </button>
       </div>
 
+      <!-- Navigation -->
+      <div class="bg-white rounded-2xl shadow-lg p-8 flex justify-center gap-4 flex-wrap">
+        <router-link
+          to="/pomodoro"
+          class="px-6 py-3 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-base font-medium shadow hover:opacity-90 transition"
+        >
+          Запустить помодоро
+        </router-link>
+        <router-link
+          to="/plugins"
+          class="px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-base font-medium shadow hover:opacity-90 transition"
+        >
+          Плагины
+        </router-link>
+      </div>
+
       <!-- Pomodoro Sessions -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="flex items-center justify-between mb-6">
@@ -274,7 +527,12 @@ function statusColor(status: string): string {
           v-if="sessions.length === 0 && !sessionsLoading"
           class="text-gray-500 text-center py-8"
         >
+<<<<<<< HEAD
+          Сегодня сессий пока нет. Запустите их пройдя в
+          <router-link to="/pomodoro" class="text-blue-600 hover:underline">таймер</router-link>
+=======
           Сегодня сессий пока нет. Запустите таймер на странице помодоро.
+>>>>>>> course
         </div>
 
         <div v-else-if="sessions.length > 0" class="overflow-x-auto">
@@ -311,18 +569,15 @@ function statusColor(status: string): string {
           </table>
         </div>
       </div>
+<<<<<<< HEAD
+=======
 
       <!-- Dynamic Plugin Widgets -->
       <div v-for="widget in pluginWidgets" :key="widget.name">
         <component :is="widget.component" />
       </div>
 
+>>>>>>> course
     </main>
-
-    <PomodoroSettingsModal
-      v-model="showSettings"
-      :settings="pomodoro.settings"
-      @save="savePomodoroSettings"
-    />
   </div>
 </template>

@@ -27,8 +27,6 @@ final readonly class UpdatePomodoroSessionUseCase
             ? Carbon::parse($data->phaseStartedAt)
             : null;
 
-        $oldStatus = $this->pomodoroSessionsRepository->getBySessionId($sessionId)->current_status;
-
         $this->pomodoroSessionsRepository->updateSessionStatus(
             sessionId: $sessionId,
             status: $status,
@@ -46,7 +44,7 @@ final readonly class UpdatePomodoroSessionUseCase
 
         event(new PomodoroPhaseChangedEvent(
             userId: $session->user_id,
-            oldStatus: $oldStatus->value,
+            oldStatus: $previousStatus?->value,
             newStatus: $session->current_status->value,
         ));
 

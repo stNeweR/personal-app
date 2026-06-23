@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/modules/user/stores/authStore'
 import { usePomodoroStore } from '@/modules/pomodoro/stores/pomodoroStore'
 import { authRoutes } from '@/modules/user/router/authRoutes'
+import { pomodoroRoutes } from '@/modules/pomodoro/router/pomodoroRoutes'
+import { pluginRoutes } from '@/modules/plugin/router/pluginRoutes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +13,8 @@ const router = createRouter({
       redirect: '/dashboard',
     },
     ...authRoutes,
+    ...pomodoroRoutes,
+    ...pluginRoutes,
   ],
 })
 

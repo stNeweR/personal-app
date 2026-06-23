@@ -15,10 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property Plan $plan
  * @property int|null $telegram_id
- * @property string|null $notification_channel
  * @property string|null $name
  * @property string|null $email
- * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string|null $password
  */
 final class User extends Authenticatable
@@ -31,10 +29,8 @@ final class User extends Authenticatable
     protected $fillable = [
         'plan',
         'telegram_id',
-        'notification_channel',
         'name',
         'email',
-        'email_verified_at',
         'password',
     ];
 
@@ -48,7 +44,6 @@ final class User extends Authenticatable
         return [
             'plan' => Plan::class,
             'password' => 'hashed',
-            'email_verified_at' => 'datetime',
         ];
     }
 

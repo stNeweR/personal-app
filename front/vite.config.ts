@@ -13,6 +13,8 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+<<<<<<< HEAD
+=======
     allowedHosts: ['my-bot.loca.lt', '.loca.lt'],
     fs: {
       allow: [
@@ -32,6 +34,7 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+>>>>>>> course
   },
   resolve: {
     alias: {
