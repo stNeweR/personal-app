@@ -1,16 +1,18 @@
 <?php
 
-use App\Core\Telegram\Infrastructure\Http\V1\Controllers\TelegramWebhookController;
 use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
+<<<<<<< HEAD
 use App\Modules\User\Infrastructure\Http\V1\Controllers\TodoistController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
+=======
+use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
+use App\Modules\User\Infrastructure\Http\V1\Controllers\UserController;
+>>>>>>> course
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::post('telegram-webhook', [TelegramWebhookController::class, 'handleWebhook']);
-
     Route::prefix('auth')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
@@ -20,23 +22,6 @@ Route::prefix('v1')->group(function () {
             Route::get('me', [AuthController::class, 'me']);
             Route::post('telegram-link-token', [AuthController::class, 'telegramLinkToken']);
         });
-    });
-
-    Route::middleware('auth:sanctum')->prefix('yandex-calendar')->group(function () {
-        Route::post('connect', [YandexCalendarController::class, 'connect']);
-        Route::get('today', [YandexCalendarController::class, 'today']);
-        Route::get('status', [YandexCalendarController::class, 'status']);
-    });
-
-    Route::middleware('auth:sanctum')->prefix('todoist')->group(function () {
-        Route::get('status', [TodoistController::class, 'status']);
-        Route::post('connect', [TodoistController::class, 'connect']);
-        Route::post('disconnect', [TodoistController::class, 'disconnect']);
-        Route::get('tasks', [TodoistController::class, 'index']);
-        Route::post('tasks', [TodoistController::class, 'store']);
-        Route::post('tasks/{id}/complete', [TodoistController::class, 'complete']);
-        Route::post('tasks/{id}/reopen', [TodoistController::class, 'reopen']);
-        Route::delete('tasks/{id}', [TodoistController::class, 'destroy']);
     });
 
     Route::middleware('auth:sanctum')->prefix('pomodoro')->group(function () {
@@ -49,7 +34,27 @@ Route::prefix('v1')->group(function () {
         Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
     });
 
+<<<<<<< HEAD
+=======
+    Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+        Route::get('status', [NotificationController::class, 'status']);
+        Route::put('channel', [NotificationController::class, 'updateChannel']);
+        Route::put('email', [NotificationController::class, 'updateEmail']);
+        Route::post('email/send-verification', [NotificationController::class, 'sendEmailVerification']);
+    });
+
+    Route::get('notifications/email/verify', [NotificationController::class, 'verifyEmail'])
+        ->name('api.v1.notifications.email.verify');
+
+>>>>>>> course
     Route::middleware('auth:sanctum')->prefix('plugins')->group(function () {
-        Route::post('{name}/{action}', [PluginController::class, 'execute']);
+        Route::get('/', [PluginController::class, 'index']);
+        Route::get('enabled', [PluginController::class, 'getEnabledManifests']);
+        Route::post('{name}/enable', [PluginController::class, 'enable']);
+        Route::post('{name}/disable', [PluginController::class, 'disable']);
+    });
+
+    Route::middleware('auth:sanctum')->prefix('user')->group(function () {
+        Route::put('plan', [UserController::class, 'updatePlan']);
     });
 });

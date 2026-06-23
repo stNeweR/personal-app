@@ -1,0 +1,14 @@
+{
+  "name": "yandex_calendar",
+  "version": "1.0.0",
+  "author": "Personal App",
+  "description": "Yandex Calendar integration via CalDAV",
+  "backend": {
+    "entry": "backend/Plugin.php",
+    "namespace": "Plugins\\YandexCalendar"
+  },
+  "frontend": {
+    "entry": "frontend/index.ts",
+    "widget": "YandexCalendarWidget"
+  }
+}

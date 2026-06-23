@@ -10,14 +10,4 @@ parameters:
     # Level 10 is the highest level
     level: 10
 
-    ignoreErrors:
-        -
-            message: '#Call to an undefined method FFI::plugin_execute\(\)#'
-            path: app/Modules/Plugin/Infrastructure/Adapters/GoFfiPluginExecutor.php
-        -
-            message: '#Call to an undefined method FFI::plugin_free\(\)#'
-            path: app/Modules/Plugin/Infrastructure/Adapters/GoFfiPluginExecutor.php
-        -
-            message: '#Strict comparison using === between FFI\\CData and null will always evaluate to false#'
-            path: app/Modules/Plugin/Infrastructure/Adapters/GoFfiPluginExecutor.php
-
+    reportUnmatchedIgnoredErrors: false

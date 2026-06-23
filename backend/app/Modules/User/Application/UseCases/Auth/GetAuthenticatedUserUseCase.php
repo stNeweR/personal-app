@@ -19,6 +19,7 @@ final readonly class GetAuthenticatedUserUseCase
 
         return [
             'id' => $user->id,
+            'plan' => $user->plan->value,
             'name' => $user->name,
             'email' => $user->email,
             'telegram_id' => $user->telegram_id,

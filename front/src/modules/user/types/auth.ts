@@ -1,5 +1,8 @@
+export type Plan = 'junior' | 'middle' | 'senior'
+
 export interface User {
   id: number
+  plan: Plan
   name: string
   email: string
   telegram_id: number | null

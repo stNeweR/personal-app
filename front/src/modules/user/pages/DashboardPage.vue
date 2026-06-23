@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import { getTodaySessions } from '@/modules/pomodoro/api/sessions'
+<<<<<<< HEAD
 import { getCalendarStatus, connectYandexCalendar, getTodayEvents } from '../api/calendar'
 import {
   getTodoistStatus,
@@ -14,9 +15,14 @@ import {
   reopenTodoistTask,
   deleteTodoistTask,
 } from '../api/todoist'
+=======
+import { usePomodoroStore } from '@/modules/pomodoro/stores/pomodoroStore'
+import PomodoroSettingsModal from '@/modules/pomodoro/components/PomodoroSettingsModal.vue'
+import type { PomodoroSettings } from '@/modules/pomodoro/types/settings'
+>>>>>>> course
 import type { PomodoroSession } from '@/modules/pomodoro/types/session'
-import type { CalendarEvent } from '../api/calendar'
-import type { TodoistTask } from '../api/todoist'
+import type { Plan } from '../types/auth'
+import { pluginRegistry } from '@/shared/plugins/PluginRegistry'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -25,6 +31,7 @@ const sessions = ref<PomodoroSession[]>([])
 const sessionsLoading = ref(false)
 const sessionsError = ref<string | null>(null)
 
+<<<<<<< HEAD
 const calendarStatus = ref<{ connected: boolean } | null>(null)
 const calendarLoading = ref(false)
 const calendarEvents = ref<CalendarEvent[]>([])
@@ -54,12 +61,53 @@ const todoistActiveCount = computed(() => todoistTasks.value.filter((t) => !t.ch
 const todoistCompletedCount = computed(() => todoistTasks.value.filter((t) => t.checked).length)
 
 onMounted(() => {
+=======
+const pomodoro = usePomodoroStore()
+const showSettings = ref(false)
+const settingsChecked = ref(false)
+
+const pluginWidgets = computed(() => pluginRegistry.getWidgets())
+
+const planOptions: { value: Plan; label: string; description: string; icon: string }[] = [
+  { value: 'junior', label: 'Junior', description: 'Только помодоро таймер', icon: '🌱' },
+  { value: 'middle', label: 'Middle', description: 'До 2 плагинов', icon: '⚡' },
+  { value: 'senior', label: 'Senior', description: 'Безлимитные плагины', icon: '🚀' },
+]
+
+const changingPlan = ref(false)
+
+async function handleChangePlan(plan: Plan): Promise<void> {
+  if (auth.user?.plan === plan) return
+
+  const planLabel = planOptions.find(p => p.value === plan)?.label ?? plan
+  if (!confirm(`Переключиться на план ${planLabel}?${plan === 'junior' ? '\n\nАктивные плагины будут отключены. Данные плагинов сохранятся.' : ''}`)) {
+    return
+  }
+
+  changingPlan.value = true
+  try {
+    await auth.changePlan(plan)
+  } catch {
+    // error is set in store
+  } finally {
+    changingPlan.value = false
+  }
+}
+
+onMounted(async () => {
+>>>>>>> course
   if (!auth.user) {
     auth.fetchUser()
   }
   loadSessions()
+<<<<<<< HEAD
   loadCalendarStatus()
   loadTodoistStatus()
+=======
+  await pomodoro.loadUserSettings()
+  settingsChecked.value = true
+  await pluginRegistry.loadPlugins()
+>>>>>>> course
 })
 
 async function loadSessions() {
@@ -75,6 +123,7 @@ async function loadSessions() {
   }
 }
 
+<<<<<<< HEAD
 async function loadCalendarStatus() {
   try {
     calendarStatus.value = await getCalendarStatus()
@@ -234,6 +283,23 @@ async function handleDeleteTodoistTask(task: TodoistTask) {
   } finally {
     mutatingTaskId.value = null
   }
+=======
+function openPomodoroSettings(): void {
+  showSettings.value = true
+}
+
+async function savePomodoroSettings(settings: PomodoroSettings): Promise<void> {
+  try {
+    await pomodoro.saveUserSettingsToBackend(settings)
+    showSettings.value = false
+  } catch {
+    // error is already set in store
+  }
+}
+
+function handleGoToTimer(): void {
+  router.push('/timer')
+>>>>>>> course
 }
 
 async function handleLogout() {
@@ -245,20 +311,6 @@ function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—'
   const date = new Date(dateStr)
   return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-}
-
-function formatEventTime(dateStr: string): string {
-  // iCalendar datetime format: YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ
-  const match = dateStr.match(/T(\d{2})(\d{2})/)
-  if (match) {
-    return `${match[1]}:${match[2]}`
-  }
-  // Fallback to native parsing for ISO strings
-  const date = new Date(dateStr)
-  if (!isNaN(date.getTime())) {
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-  }
-  return dateStr
 }
 
 function statusLabel(status: string): string {
@@ -283,25 +335,6 @@ function statusColor(status: string): string {
   return map[status] || 'text-gray-600 bg-gray-50'
 }
 
-function priorityLabel(priority: number): string {
-  const map: Record<number, string> = {
-    1: 'Обычный',
-    2: 'Средний',
-    3: 'Высокий',
-    4: 'Срочный',
-  }
-  return map[priority] || `P${priority}`
-}
-
-function priorityColor(priority: number): string {
-  const map: Record<number, string> = {
-    1: 'text-gray-600 bg-gray-50',
-    2: 'text-blue-600 bg-blue-50',
-    3: 'text-orange-600 bg-orange-50',
-    4: 'text-red-600 bg-red-50',
-  }
-  return map[priority] || 'text-gray-600 bg-gray-50'
-}
 </script>
 
 <template>
@@ -320,12 +353,19 @@ function priorityColor(priority: number): string {
           >
             Выйти
           </button>
+          <router-link
+            to="/plugins"
+            class="px-4 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm font-medium"
+          >
+            Плагины
+          </router-link>
         </div>
       </div>
     </header>
 
     <!-- Content -->
     <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+<<<<<<< HEAD
       <!-- Calendar Section -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -347,324 +387,109 @@ function priorityColor(priority: number): string {
               {{ calendarLoading ? 'Загрузка...' : 'Обновить' }}
             </button>
           </div>
+=======
+      <!-- Plan Selector -->
+      <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-800">📋 Ваш план: {{ auth.user?.plan ? planOptions.find(p => p.value === auth.user?.plan)?.label ?? auth.user.plan : 'Junior' }}</h3>
+          <p class="text-sm text-gray-500 mt-1">
+            Выберите план для управления доступом к плагинам
+          </p>
         </div>
 
-        <!-- Connect Form -->
-        <div
-          v-if="showConnectForm && !calendarStatus?.connected"
-          class="mb-6 bg-gray-50 rounded-xl p-6"
-        >
-          <h4 class="font-semibold text-gray-800 mb-4">Подключение Яндекс Календаря</h4>
-          <div class="space-y-3 max-w-md">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email Яндекса</label>
-              <input
-                v-model="yandexEmail"
-                type="email"
-                placeholder="your@yandex.ru"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Пароль приложения</label>
-              <input
-                v-model="yandexPassword"
-                type="password"
-                placeholder="Введите пароль приложения"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <p class="text-xs text-gray-500 mt-1">
-                Создайте пароль приложения в
-                <a
-                  href="https://id.yandex.ru/security/app-passwords"
-                  target="_blank"
-                  class="text-blue-600 hover:underline"
-                  >настройках безопасности Яндекса</a
-                >
-              </p>
-            </div>
-            <div class="flex gap-3">
-              <button
-                @click="handleConnectYandex"
-                :disabled="connectLoading || !yandexEmail || !yandexPassword"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
-              >
-                {{ connectLoading ? 'Подключение...' : 'Подключить' }}
-              </button>
-              <button
-                @click="showConnectForm = false"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-300 transition"
-              >
-                Отмена
-              </button>
-            </div>
-          </div>
+        <div v-if="auth.error" class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+          {{ auth.error }}
+>>>>>>> course
         </div>
 
-        <div v-if="calendarError" class="text-red-500 text-sm mb-4">{{ calendarError }}</div>
-
-        <div
-          v-if="!calendarStatus || (!calendarStatus.connected && !showConnectForm)"
-          class="text-gray-500 text-center py-8"
-        >
-          Подключите Яндекс Календарь, чтобы увидеть расписание на сегодня.
-        </div>
-
-        <div
-          v-else-if="calendarEvents.length === 0 && !calendarLoading && calendarStatus?.connected"
-          class="text-gray-500 text-center py-8"
-        >
-          На сегодня событий нет.
-        </div>
-
-        <div v-else-if="calendarEvents.length > 0" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
-            v-for="event in calendarEvents"
-            :key="event.id"
-            class="border border-gray-100 rounded-xl p-4 hover:bg-gray-50 transition"
+            v-for="option in planOptions"
+            :key="option.value"
+            :class="[
+              'rounded-xl p-5 border-2 transition cursor-pointer',
+              auth.user?.plan === option.value
+                ? 'border-accent-purple bg-accent-purple/5'
+                : 'border-gray-200 hover:border-gray-300 bg-white',
+            ]"
+            @click="handleChangePlan(option.value)"
           >
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h4 class="font-semibold text-gray-800">{{ event.summary || 'Без названия' }}</h4>
-                <p v-if="event.description" class="text-sm text-gray-500 mt-1">
-                  {{ event.description }}
-                </p>
-              </div>
-              <div class="text-sm text-gray-500 whitespace-nowrap">
-                {{ formatEventTime(event.start) }} — {{ formatEventTime(event.end) }}
-              </div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">{{ option.icon }}</span>
+              <span
+                v-if="auth.user?.plan === option.value"
+                class="px-2 py-0.5 rounded-full text-xs font-medium bg-accent-purple text-white"
+              >
+                Текущий
+              </span>
             </div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">{{ option.label }}</h4>
+            <p class="text-sm text-gray-500">{{ option.description }}</p>
+            <button
+              v-if="auth.user?.plan !== option.value"
+              :disabled="changingPlan"
+              class="mt-4 w-full px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
+            >
+              {{ changingPlan ? 'Смена...' : 'Выбрать' }}
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Todoist Section -->
+      <!-- Pomodoro Settings Section -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h3 class="text-xl font-bold text-gray-800">Задачи Todoist</h3>
-            <p v-if="todoistConnected" class="text-xs text-gray-500 mt-1">
-              Активных: {{ todoistActiveCount }} · Завершённых: {{ todoistCompletedCount }}
+            <h3 class="text-xl font-bold text-gray-800">🍅 Настройки помодоро</h3>
+            <p class="text-sm text-gray-500 mt-1">
+              Настройте таймер перед началом работы
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <button
-              v-if="!todoistConnected"
-              @click="showTodoistConnectForm = !showTodoistConnectForm"
-              class="px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-medium shadow hover:opacity-90 transition"
-            >
-              Подключить Todoist
-            </button>
-            <template v-else>
-              <button
-                @click="showCreateTodoistForm = !showCreateTodoistForm"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-medium shadow hover:opacity-90 transition"
-              >
-                {{ showCreateTodoistForm ? 'Скрыть' : 'Новая задача' }}
-              </button>
-              <button
-                @click="loadTodoistTasks"
-                :disabled="todoistLoading"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
-              >
-                {{ todoistLoading ? 'Загрузка...' : 'Обновить' }}
-              </button>
-              <button
-                @click="handleDisconnectTodoist"
-                :disabled="todoistConnectLoading"
-                class="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-300 transition disabled:opacity-50"
-              >
-                Отключить
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <!-- Connect Form -->
-        <div
-          v-if="showTodoistConnectForm && !todoistConnected"
-          class="mb-6 bg-gray-50 rounded-xl p-6"
-        >
-          <h4 class="font-semibold text-gray-800 mb-4">Подключение Todoist</h4>
-          <div class="space-y-3 max-w-md">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">API токен</label>
-              <input
-                v-model="todoistApiToken"
-                type="password"
-                placeholder="Введите API токен Todoist"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-              <p class="text-xs text-gray-500 mt-1">
-                Получите токен в
-                <a
-                  href="https://todoist.com/app/settings/integrations/developer"
-                  target="_blank"
-                  class="text-blue-600 hover:underline"
-                  >настройках интеграций Todoist</a
-                >
-              </p>
-            </div>
-            <div class="flex gap-3">
-              <button
-                @click="handleConnectTodoist"
-                :disabled="todoistConnectLoading || !todoistApiToken"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
-              >
-                {{ todoistConnectLoading ? 'Подключение...' : 'Подключить' }}
-              </button>
-              <button
-                @click="showTodoistConnectForm = false"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-300 transition"
-              >
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Create Form -->
-        <div
-          v-if="showCreateTodoistForm && todoistConnected"
-          class="mb-6 bg-gray-50 rounded-xl p-6"
-        >
-          <h4 class="font-semibold text-gray-800 mb-4">Новая задача</h4>
-          <div class="space-y-3 max-w-md">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Содержание</label>
-              <input
-                v-model="newTaskContent"
-                type="text"
-                placeholder="Что нужно сделать?"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Описание (необязательно)</label
-              >
-              <textarea
-                v-model="newTaskDescription"
-                rows="2"
-                placeholder="Дополнительные детали"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Приоритет</label>
-              <select
-                v-model.number="newTaskPriority"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option :value="1">Обычный</option>
-                <option :value="2">Средний</option>
-                <option :value="3">Высокий</option>
-                <option :value="4">Срочный</option>
-              </select>
-            </div>
-            <div class="flex gap-3">
-              <button
-                @click="handleCreateTodoistTask"
-                :disabled="createTaskLoading || !newTaskContent.trim()"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-medium shadow hover:opacity-90 transition disabled:opacity-50"
-              >
-                {{ createTaskLoading ? 'Создание...' : 'Создать' }}
-              </button>
-              <button
-                @click="showCreateTodoistForm = false"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-300 transition"
-              >
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="todoistError" class="text-red-500 text-sm mb-4">{{ todoistError }}</div>
-
-        <div
-          v-if="!todoistConnected && !showTodoistConnectForm"
-          class="text-gray-500 text-center py-8"
-        >
-          Подключите Todoist, чтобы видеть и управлять задачами.
-        </div>
-
-        <div
-          v-else-if="todoistConnected && todoistTasks.length === 0 && !todoistLoading"
-          class="text-gray-500 text-center py-8"
-        >
-          Задач пока нет. Создайте первую!
-        </div>
-
-        <div v-else-if="todoistTasks.length > 0" class="space-y-2">
-          <div
-            v-for="task in todoistTasks"
-            :key="task.id"
-            class="border border-gray-100 rounded-xl p-4 hover:bg-gray-50 transition flex items-start gap-3"
-            :class="task.checked ? 'opacity-60' : ''"
+          <button
+            v-if="pomodoro.hasBackendSettings"
+            @click="handleGoToTimer"
+            class="px-4 py-2 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition"
           >
-            <input
-              type="checkbox"
-              :checked="task.checked"
-              :disabled="mutatingTaskId === task.id"
-              @change="
-                task.checked ? handleReopenTodoistTask(task) : handleCompleteTodoistTask(task)
-              "
-              class="mt-1 w-5 h-5 rounded border-gray-300 text-rose-500 focus:ring-rose-500 cursor-pointer disabled:opacity-50"
-            />
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-3 flex-wrap">
-                <div class="min-w-0 flex-1">
-                  <h4
-                    class="font-medium text-gray-800"
-                    :class="task.checked ? 'line-through text-gray-500' : ''"
-                  >
-                    {{ task.content }}
-                  </h4>
-                  <p v-if="task.description" class="text-sm text-gray-500 mt-1 whitespace-pre-line">
-                    {{ task.description }}
-                  </p>
-                  <div class="flex items-center gap-2 mt-2 flex-wrap">
-                    <span
-                      class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
-                      :class="priorityColor(task.priority)"
-                    >
-                      {{ priorityLabel(task.priority) }}
-                    </span>
-                    <span v-if="task.due" class="text-xs text-gray-500">
-                      📅 {{ task.due.string || task.due.date || task.due.datetime }}
-                    </span>
-                    <span
-                      v-for="label in task.labels"
-                      :key="label"
-                      class="inline-block px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600"
-                    >
-                      @{{ label }}
-                    </span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <a
-                    v-if="task.url"
-                    :href="task.url"
-                    target="_blank"
-                    rel="noopener"
-                    class="text-xs text-blue-600 hover:underline"
-                  >
-                    Открыть
-                  </a>
-                  <button
-                    @click="handleDeleteTodoistTask(task)"
-                    :disabled="mutatingTaskId === task.id"
-                    class="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                  >
-                    Удалить
-                  </button>
-                </div>
-              </div>
-            </div>
+            Перейти к таймеру
+          </button>
+        </div>
+
+        <div
+          v-if="settingsChecked && !pomodoro.hasBackendSettings"
+          class="mb-6 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800"
+        >
+          Добавьте настройки помодоро, чтобы открыть страницу таймера.
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-500 mb-1">Работа</div>
+            <div class="text-lg font-bold text-gray-800">{{ pomodoro.settings.workTime }} мин</div>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-500 mb-1">Перерыв</div>
+            <div class="text-lg font-bold text-gray-800">{{ pomodoro.settings.breakTime }} мин</div>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-500 mb-1">Длинный перерыв</div>
+            <div class="text-lg font-bold text-gray-800">{{ pomodoro.settings.longBreakTime }} мин</div>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-500 mb-1">До длинного</div>
+            <div class="text-lg font-bold text-gray-800">{{ pomodoro.settings.sessionsBeforeLongBreak }}</div>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <div class="text-xs text-gray-500 mb-1">Всего помодоро</div>
+            <div class="text-lg font-bold text-gray-800">{{ pomodoro.settings.totalPomodoros }}</div>
           </div>
         </div>
+
+        <button
+          @click="openPomodoroSettings"
+          class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white text-sm font-medium shadow hover:opacity-90 transition"
+        >
+          {{ pomodoro.hasBackendSettings ? 'Изменить настройки' : 'Добавить настройки' }}
+        </button>
       </div>
 
       <!-- Navigation -->
@@ -702,8 +527,12 @@ function priorityColor(priority: number): string {
           v-if="sessions.length === 0 && !sessionsLoading"
           class="text-gray-500 text-center py-8"
         >
+<<<<<<< HEAD
           Сегодня сессий пока нет. Запустите их пройдя в
           <router-link to="/pomodoro" class="text-blue-600 hover:underline">таймер</router-link>
+=======
+          Сегодня сессий пока нет. Запустите таймер на странице помодоро.
+>>>>>>> course
         </div>
 
         <div v-else-if="sessions.length > 0" class="overflow-x-auto">
@@ -740,6 +569,15 @@ function priorityColor(priority: number): string {
           </table>
         </div>
       </div>
+<<<<<<< HEAD
+=======
+
+      <!-- Dynamic Plugin Widgets -->
+      <div v-for="widget in pluginWidgets" :key="widget.name">
+        <component :is="widget.component" />
+      </div>
+
+>>>>>>> course
     </main>
   </div>
 </template>

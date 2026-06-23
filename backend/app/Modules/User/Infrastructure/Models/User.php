@@ -2,6 +2,7 @@
 
 namespace App\Modules\User\Infrastructure\Models;
 
+use App\Modules\User\Domain\Enums\Plan;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,6 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @class User
  *
  * @property int $id
+ * @property Plan $plan
  * @property int|null $telegram_id
  * @property string|null $name
  * @property string|null $email
@@ -25,6 +27,7 @@ final class User extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
+        'plan',
         'telegram_id',
         'name',
         'email',
@@ -39,6 +42,7 @@ final class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'plan' => Plan::class,
             'password' => 'hashed',
         ];
     }

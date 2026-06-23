@@ -13,13 +13,13 @@ final class PluginExecutionException extends RuntimeException
         return new self("Plugin execution failed: {$error}");
     }
 
-    public static function ffiNotAvailable(): self
+    public static function pluginNotFound(string $name): self
     {
-        return new self('PHP FFI extension is not available.');
+        return new self("Plugin not found: {$name}");
     }
 
-    public static function libraryNotFound(string $path): self
+    public static function manifestNotFound(string $path): self
     {
-        return new self("Plugin library not found at: {$path}");
+        return new self("Plugin manifest not found at: {$path}");
     }
 }

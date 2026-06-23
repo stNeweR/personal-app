@@ -52,20 +52,20 @@ final readonly class PomodoroStageService
         if ($currentStatus === PomodoroStatusValue::WORK) {
             $this->startWorkUseCase->handle(
                 sessionId: $sessionId,
+                userId: $user->id,
                 currentCycle: $currentCycle,
                 workDuration: $settings->work_duration,
                 totalCycles: $settings->repeats_count,
-                chatId: $user->telegram_id
             );
         } elseif ($currentStatus === PomodoroStatusValue::FINISHED) {
-            $this->finishSessionUseCase->handle($sessionId, $user->telegram_id);
+            $this->finishSessionUseCase->handle($sessionId, $user->id);
         } else {
             $this->breakSessionUseCase->handle(
                 sessionId: $sessionId,
-                chatId: $user->telegram_id,
+                userId: $user->id,
                 currentCycle: $currentCycle,
                 settings: $settings,
-                totalCycles: $totalCycles
+                totalCycles: $totalCycles,
             );
         }
     }
