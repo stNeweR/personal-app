@@ -6,6 +6,7 @@ namespace App\Modules\User\Application\UseCases\Auth;
 
 use App\Modules\User\Application\DTOs\AuthUserResponseDTO;
 use App\Modules\User\Application\DTOs\LoginUserDTO;
+use App\Modules\User\Domain\Exceptions\ActiveSessionException;
 use App\Modules\User\Domain\Repository\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -22,6 +23,10 @@ final readonly class LoginUserUseCase
 
         if ($user === null || ! Hash::check($dto->password, $user->password)) {
             throw new UnauthorizedHttpException('', 'Invalid credentials');
+        }
+
+        if ($user->tokens()->exists()) {
+            throw new ActiveSessionException();
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;
