@@ -36,7 +36,7 @@ final class Plugin implements PluginInterface
             }
 
             $relative = substr($class, strlen($prefix));
-            $file = $pluginDir . '/' . str_replace('\\', '/', $relative) . '.php';
+            $file = $pluginDir.'/'.str_replace('\\', '/', $relative).'.php';
 
             if (file_exists($file)) {
                 require_once $file;
@@ -56,7 +56,7 @@ final class Plugin implements PluginInterface
 
     private function mergeConfig(): void
     {
-        $pluginConfig = __DIR__ . '/Config/telegram.php';
+        $pluginConfig = __DIR__.'/Config/telegram.php';
         if (file_exists($pluginConfig)) {
             $merged = array_replace_recursive(
                 config('telegram', []),
@@ -101,7 +101,7 @@ final class Plugin implements PluginInterface
 
         Route::middleware('auth:sanctum')
             ->prefix('api/v1/telegram-notifier')
-            ->group(__DIR__ . '/Routes/routes.php');
+            ->group(__DIR__.'/Routes/routes.php');
     }
 
     private function registerCommands(): void
@@ -114,8 +114,10 @@ final class Plugin implements PluginInterface
                     $this->info('Webhook set!');
                 } catch (\App\Core\Telegram\Domain\Exceptions\SetWebhookException $e) {
                     $this->error($e->getMessage());
+
                     return 1;
                 }
+
                 return 0;
             });
 
@@ -126,8 +128,10 @@ final class Plugin implements PluginInterface
                     $this->info('Commands set!');
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
+
                     return 1;
                 }
+
                 return 0;
             });
         }

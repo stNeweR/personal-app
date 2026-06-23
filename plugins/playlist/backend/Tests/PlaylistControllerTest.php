@@ -30,7 +30,7 @@ final class PlaylistControllerTest extends TestCase
         // Plugin classes are not in Composer autoload; register and boot manually.
         require_once base_path('plugins/playlist/backend/Plugin.php');
 
-        $plugin = new \Plugins\Playlist\Plugin();
+        $plugin = new \Plugins\Playlist\Plugin;
         $plugin->register();
         $plugin->boot();
     }

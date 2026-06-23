@@ -21,12 +21,12 @@ final readonly class LoginUserUseCase
     {
         $user = $this->userRepository->findByEmail($dto->email);
 
-        if ($user === null || ! Hash::check($dto->password, $user->password)) {
+        if ($user === null || $user->password === null || ! Hash::check($dto->password, $user->password)) {
             throw new UnauthorizedHttpException('', 'Invalid credentials');
         }
 
         if ($user->tokens()->exists()) {
-            throw new ActiveSessionException();
+            throw new ActiveSessionException;
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;

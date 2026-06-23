@@ -32,7 +32,7 @@ final class Plugin implements PluginInterface
             }
 
             $relative = substr($class, strlen($prefix));
-            $file = $pluginDir . '/' . str_replace('\\', '/', $relative) . '.php';
+            $file = $pluginDir.'/'.str_replace('\\', '/', $relative).'.php';
 
             if (file_exists($file)) {
                 require_once $file;
@@ -73,6 +73,6 @@ final class Plugin implements PluginInterface
     {
         Route::middleware('auth:sanctum')
             ->prefix('api/v1/mail-notifier')
-            ->group(__DIR__ . '/Routes/routes.php');
+            ->group(__DIR__.'/Routes/routes.php');
     }
 }

@@ -73,7 +73,10 @@ final class PluginServiceProvider extends ServiceProvider
             return;
         }
 
-        foreach (glob($pluginsPath.'/*/backend/Migrations') as $migrationsDir) {
+        /** @var list<string> $migrationDirs */
+        $migrationDirs = glob($pluginsPath.'/*/backend/Migrations') ?: [];
+
+        foreach ($migrationDirs as $migrationsDir) {
             if (is_dir($migrationsDir)) {
                 $this->loadMigrationsFrom($migrationsDir);
             }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Plugins\Playlist\Services;
 
-use Plugins\Playlist\Models\Playlist;
 use App\Modules\User\Infrastructure\Models\User;
+use Plugins\Playlist\Models\Playlist;
 
 final class PlaylistService
 {

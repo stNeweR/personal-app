@@ -22,8 +22,10 @@ final readonly class AddRepeatsCountUseCase
 
         $this->pomodoroSettingsRepository->update($user->id, 'repeats_count', (int) $data->message);
 
-        $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_LONG_BREAK_DURATION);
+        if ($user->telegram_id !== null) {
+            $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_LONG_BREAK_DURATION);
 
-        $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.repeats_count_saved'));
+            $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.repeats_count_saved'));
+        }
     }
 }

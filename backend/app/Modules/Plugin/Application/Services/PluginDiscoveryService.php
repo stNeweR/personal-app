@@ -38,6 +38,7 @@ final class PluginDiscoveryService
             return $manifests;
         }
 
+        /** @var list<string> $directories */
         $directories = File::directories($this->pluginsPath);
 
         foreach ($directories as $directory) {
@@ -48,13 +49,17 @@ final class PluginDiscoveryService
             }
 
             $content = File::get($manifestPath);
+            /** @var array<string, mixed>|null $data */
             $data = json_decode($content, true);
 
             if ($data === null || ! isset($data['name'])) {
                 continue;
             }
 
-            $manifests[$data['name']] = PluginManifest::fromArray($data);
+            /** @var string $pluginName */
+            $pluginName = $data['name'];
+            /** @var array{name: string, version?: string, author?: string, description?: string, backend?: array{entry?: string, namespace?: string}, frontend?: array{entry?: string, widget?: string}} $data */
+            $manifests[$pluginName] = PluginManifest::fromArray($data);
         }
 
         return $manifests;
@@ -91,6 +96,7 @@ final class PluginDiscoveryService
      */
     public function getEnabledManifests(): array
     {
+        /** @var list<string> $enabledNames */
         $enabledNames = Plugin::where('enabled', true)->pluck('name')->toArray();
         $all = $this->discover();
 
@@ -119,7 +125,10 @@ final class PluginDiscoveryService
             return false;
         }
 
-        foreach (File::directories($path) as $directory) {
+        /** @var list<string> $directories */
+        $directories = File::directories($path);
+
+        foreach ($directories as $directory) {
             if (File::exists($directory.'/plugin.json')) {
                 return true;
             }

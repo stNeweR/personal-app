@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Plugin;
 
-use App\Modules\Plugin\Domain\Contracts\PluginExecutorInterface;
 use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;

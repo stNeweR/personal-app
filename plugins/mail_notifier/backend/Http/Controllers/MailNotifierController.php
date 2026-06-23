@@ -42,7 +42,7 @@ final class MailNotifierController
 
         $email = (string) $request->input('email');
 
-        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json(['message' => 'Valid email is required'], 422);
         }
 

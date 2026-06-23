@@ -100,6 +100,6 @@ final class PomodoroSessionsRepository implements PomodoroSessionsRepositoryInte
 
     public function delete(int $sessionId): bool
     {
-        return $this->getBySessionId($sessionId)->delete();
+        return (bool) $this->getBySessionId($sessionId)->delete();
     }
 }

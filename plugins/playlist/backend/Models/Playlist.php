@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plugins\Playlist\Models;
 
+use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Modules\User\Infrastructure\Models\User;
 
 class Playlist extends Model
 {

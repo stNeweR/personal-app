@@ -29,7 +29,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./src
+        working-directory: ./backend
 
     steps:
       - name: Checkout code
@@ -55,10 +55,13 @@ jobs:
             ${{ runner.os }}-php-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Copy .env.testing to .env
         run: cp .env.testing .env
+
+      - name: Symlink plugins into backend
+        run: ln -sfn ../plugins plugins
 
       - name: Generate application key
         run: php artisan key:generate
@@ -80,7 +83,7 @@ jobs:
           DB_CONNECTION: pgsql
           DB_HOST: 127.0.0.1
           DB_PORT: 5432
-          DB_DATABASE: bot_db
+          DB_DATABASE: bot_test
           DB_USERNAME: postgres
           DB_PASSWORD: secret
         run: php artisan migrate --force

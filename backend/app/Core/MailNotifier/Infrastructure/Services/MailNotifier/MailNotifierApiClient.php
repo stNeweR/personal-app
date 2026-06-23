@@ -15,7 +15,7 @@ final class MailNotifierApiClient implements MailNotifierApiClientInterface
     public function sendEmail(SendEmailDTO $dto): MailNotifierResponse
     {
         try {
-            Mail::raw($dto->body, function ($message) use ($dto) {
+            Mail::raw($dto->body, function (\Illuminate\Mail\Message $message) use ($dto): void {
                 $message->to($dto->to);
                 $message->subject($dto->subject);
 

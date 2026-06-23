@@ -20,6 +20,10 @@ final readonly class AddCyclesBeforeLongBreakUseCase
         $user = $this->userAdapter->getUserByTelegramId($data->telegramId);
         $settings = $this->pomodoroSettingsRepository->getByUserId($user->id);
 
+        if ($user->telegram_id === null) {
+            return;
+        }
+
         if ($settings !== null && (int) $data->message >= $settings->repeats_count) {
             $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.cycles_exceed_repeats'));
         } else {

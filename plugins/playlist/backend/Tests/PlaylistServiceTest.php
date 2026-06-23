@@ -23,10 +23,10 @@ final class PlaylistServiceTest extends TestCase
         // Plugin classes are not in Composer autoload; register them manually.
         require_once base_path('plugins/playlist/backend/Plugin.php');
 
-        $plugin = new \Plugins\Playlist\Plugin();
+        $plugin = new \Plugins\Playlist\Plugin;
         $plugin->register();
 
-        $this->service = new PlaylistService();
+        $this->service = new PlaylistService;
     }
 
     public function test_get_url_returns_null_when_no_playlist_exists(): void

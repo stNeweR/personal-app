@@ -34,10 +34,12 @@ final readonly class PomodoroStageService
 
         if (! $settings) {
             Log::info('test');
-            $this->telegramAdapter->sendMessage(
-                chatId: $user->telegram_id,
-                text: __('pomodoro.setup_pomodoro_first')
-            );
+            if ($user->telegram_id !== null) {
+                $this->telegramAdapter->sendMessage(
+                    chatId: $user->telegram_id,
+                    text: __('pomodoro.setup_pomodoro_first')
+                );
+            }
 
             return;
         }

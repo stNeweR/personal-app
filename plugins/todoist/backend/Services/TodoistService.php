@@ -77,12 +77,12 @@ final class TodoistService
         $response = Http::withToken($token)
             ->asForm()
             ->timeout(self::TIMEOUT)
-            ->post(self::API_BASE . '/sync', [
+            ->post(self::API_BASE.'/sync', [
                 'resource_types' => '["items"]',
             ]);
 
         if ($response->failed()) {
-            throw new \RuntimeException('Todoist API error: ' . $response->body());
+            throw new \RuntimeException('Todoist API error: '.$response->body());
         }
 
         return $response->json('items') ?? [];
@@ -103,7 +103,7 @@ final class TodoistService
             $args['priority'] = $priority;
         }
 
-        $tempId = 'tmp-' . (string) Str::uuid()->getHex() . '-' . now()->getTimestampMs();
+        $tempId = 'tmp-'.(string) Str::uuid()->getHex().'-'.now()->getTimestampMs();
         $cmdUuid = (string) Str::uuid()->getHex();
 
         $result = $this->runCommand($token, 'item_add', $args, $tempId, $cmdUuid);
@@ -167,8 +167,7 @@ final class TodoistService
     }
 
     /**
-     * @param array<string, mixed> $args
-     *
+     * @param  array<string, mixed>  $args
      * @return array<string, mixed>
      */
     private function runCommand(string $token, string $commandType, array $args, ?string $tempId = null, ?string $cmdUuid = null): array
@@ -188,12 +187,12 @@ final class TodoistService
         $response = Http::withToken($token)
             ->asForm()
             ->timeout(self::TIMEOUT)
-            ->post(self::API_BASE . '/sync', [
+            ->post(self::API_BASE.'/sync', [
                 'commands' => json_encode([$command]),
             ]);
 
         if ($response->failed()) {
-            throw new \RuntimeException('Todoist API error: ' . $response->body());
+            throw new \RuntimeException('Todoist API error: '.$response->body());
         }
 
         /** @var array<string, mixed> $data */
@@ -203,7 +202,7 @@ final class TodoistService
         $syncStatus = $data['sync_status'] ?? [];
 
         if (($syncStatus[$cmdUuid] ?? null) !== 'ok') {
-            throw new \RuntimeException("Todoist {$commandType} failed: " . json_encode($syncStatus));
+            throw new \RuntimeException("Todoist {$commandType} failed: ".json_encode($syncStatus));
         }
 
         return $data;
@@ -221,8 +220,7 @@ final class TodoistService
     }
 
     /**
-     * @param array<string, mixed> $item
-     *
+     * @param  array<string, mixed>  $item
      * @return array<string, mixed>
      */
     private function normalizeTask(array $item): array

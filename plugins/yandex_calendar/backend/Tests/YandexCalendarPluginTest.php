@@ -29,7 +29,7 @@ final class YandexCalendarPluginTest extends TestCase
 
         require_once base_path('plugins/yandex_calendar/backend/Plugin.php');
 
-        $plugin = new \Plugins\YandexCalendar\Plugin();
+        $plugin = new \Plugins\YandexCalendar\Plugin;
         $plugin->register();
         $plugin->boot();
     }
@@ -103,7 +103,7 @@ final class YandexCalendarPluginTest extends TestCase
             'app_password' => 'app-password',
         ])->assertOk();
 
-        $response = $this->actingAs($user)->getJson("{$this->baseUrl}/today?date=" . now()->format('Y-m-d'));
+        $response = $this->actingAs($user)->getJson("{$this->baseUrl}/today?date=".now()->format('Y-m-d'));
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
@@ -112,7 +112,7 @@ final class YandexCalendarPluginTest extends TestCase
 
     private function discoveryResponse(): string
     {
-        return <<<XML
+        return <<<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:response>
@@ -131,7 +131,7 @@ XML;
 
     private function emptyReportResponse(): string
     {
-        return <<<XML
+        return <<<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <C:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
 </C:multistatus>

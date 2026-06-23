@@ -10,7 +10,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Plugins\MailNotifier\Models\MailNotifierCredential;
-use Plugins\MailNotifier\Models\MailNotifierHistory;
 use Tests\TestCase;
 
 final class MailNotifierControllerTest extends TestCase
@@ -32,7 +31,7 @@ final class MailNotifierControllerTest extends TestCase
 
         require_once base_path('plugins/mail_notifier/backend/Plugin.php');
 
-        $plugin = new \Plugins\MailNotifier\Plugin();
+        $plugin = new \Plugins\MailNotifier\Plugin;
         $plugin->register();
         $plugin->boot();
     }

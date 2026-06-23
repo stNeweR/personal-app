@@ -11,6 +11,9 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 #[MapName(SnakeCaseMapper::class)]
 final class AuthUserResponseDTO extends Data
 {
+    /**
+     * @param  array{id: int, name: string|null, email: string|null}  $user
+     */
     public function __construct(
         public readonly string $token,
         public readonly array $user,
