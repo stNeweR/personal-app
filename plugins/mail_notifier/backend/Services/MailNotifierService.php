@@ -33,12 +33,14 @@ final class MailNotifierService
 
         if ($event->oldStatus === $event->newStatus) {
             Log::info('mail_notifier: skipped - same status');
+
             return;
         }
 
         $targets = ['work', 'break', 'long_break', 'finished'];
         if (! in_array($event->newStatus, $targets, true)) {
             Log::info('mail_notifier: skipped - newStatus not in targets', ['newStatus' => $event->newStatus]);
+
             return;
         }
 
@@ -46,6 +48,7 @@ final class MailNotifierService
             $user = $this->userRepository->getByUserId($event->userId);
         } catch (ModelNotFoundException) {
             Log::warning('mail_notifier: user not found', ['userId' => $event->userId]);
+
             return;
         }
 
@@ -54,6 +57,7 @@ final class MailNotifierService
                 'email' => $user->email,
                 'email_verified_at' => $user->email_verified_at,
             ]);
+
             return;
         }
 
@@ -177,7 +181,7 @@ final class MailNotifierService
 
         $storedCode = Crypt::decryptString($credential->verification_token);
 
-        if (!hash_equals(strtoupper($storedCode), strtoupper($code))) {
+        if (! hash_equals(strtoupper($storedCode), strtoupper($code))) {
             throw new \RuntimeException('Invalid code');
         }
 

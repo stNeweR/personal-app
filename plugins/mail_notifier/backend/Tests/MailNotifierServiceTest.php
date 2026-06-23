@@ -32,7 +32,7 @@ final class MailNotifierServiceTest extends TestCase
 
         require_once base_path('plugins/mail_notifier/backend/Plugin.php');
 
-        $plugin = new \Plugins\MailNotifier\Plugin();
+        $plugin = new \Plugins\MailNotifier\Plugin;
         $plugin->register();
         $plugin->boot();
 

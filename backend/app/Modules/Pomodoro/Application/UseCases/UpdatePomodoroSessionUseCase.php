@@ -42,15 +42,12 @@ final readonly class UpdatePomodoroSessionUseCase
 
         $session = $this->pomodoroSessionsRepository->getBySessionId($sessionId);
 
-<<<<<<< HEAD
-=======
         event(new PomodoroPhaseChangedEvent(
             userId: $session->user_id,
-            oldStatus: $oldStatus->value,
+            oldStatus: $previousStatus?->value,
             newStatus: $session->current_status->value,
         ));
 
->>>>>>> course
         return new PomodoroSessionDTO(
             id: $session->id,
             current_status: $session->current_status->value,

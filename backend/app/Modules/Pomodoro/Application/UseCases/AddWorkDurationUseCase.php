@@ -25,12 +25,18 @@ final readonly class AddWorkDurationUseCase
         if (is_null($settings)) {
             $this->pomodoroSettingsRepository->create($user->id, (int) $data->message);
 
-            $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.work_duration_saved'));
+            if ($user->telegram_id !== null) {
+                $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.work_duration_saved'));
+            }
         } else {
             $this->pomodoroSettingsRepository->update($user->id, 'work_duration', (int) $data->message);
 
-            $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.work_duration_updated'));
+            if ($user->telegram_id !== null) {
+                $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.work_duration_updated'));
+            }
         }
-        $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_BREAK_DURATION);
+        if ($user->telegram_id !== null) {
+            $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_BREAK_DURATION);
+        }
     }
 }

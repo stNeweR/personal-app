@@ -31,12 +31,14 @@ final class TelegramNotifierService
 
         if ($event->oldStatus === $event->newStatus) {
             Log::info('telegram_notifier: skipped - same status');
+
             return;
         }
 
         $targets = ['work', 'break', 'long_break', 'finished'];
         if (! in_array($event->newStatus, $targets, true)) {
             Log::info('telegram_notifier: skipped - newStatus not in targets', ['newStatus' => $event->newStatus]);
+
             return;
         }
 
@@ -44,6 +46,7 @@ final class TelegramNotifierService
             $user = $this->userRepository->getByUserId($event->userId);
         } catch (ModelNotFoundException) {
             Log::warning('telegram_notifier: user not found', ['userId' => $event->userId]);
+
             return;
         }
 
@@ -52,6 +55,7 @@ final class TelegramNotifierService
                 'notification_channel' => $user->notification_channel,
                 'telegram_id' => $user->telegram_id,
             ]);
+
             return;
         }
 

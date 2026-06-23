@@ -29,7 +29,7 @@ final class TodoistPluginTest extends TestCase
 
         require_once base_path('plugins/todoist/backend/Plugin.php');
 
-        $plugin = new \Plugins\Todoist\Plugin();
+        $plugin = new \Plugins\Todoist\Plugin;
         $plugin->register();
         $plugin->boot();
     }

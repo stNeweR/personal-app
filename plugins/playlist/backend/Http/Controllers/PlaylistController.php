@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Plugins\Playlist\Http\Controllers;
 
-use Plugins\Playlist\Http\Requests\SavePlaylistRequest;
-use Plugins\Playlist\Services\PlaylistService;
 use App\Modules\User\Infrastructure\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Plugins\Playlist\Http\Requests\SavePlaylistRequest;
+use Plugins\Playlist\Services\PlaylistService;
 
 final class PlaylistController
 {

@@ -40,7 +40,7 @@ final class PluginController
     {
         /** @var \App\Modules\User\Infrastructure\Models\User|null $user */
         $user = $request->user();
-        $plan = $user?->plan ?? Plan::Junior;
+        $plan = $user->plan ?? Plan::Junior;
 
         if ($plan === Plan::Junior) {
             return response()->json(['message' => 'План Junior не позволяет активировать плагины. Поменяйте план.'], 403);

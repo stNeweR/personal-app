@@ -22,8 +22,10 @@ final readonly class AddBreakDurationUseCase
 
         $this->pomodoroSettingsRepository->update($user->id, 'break_duration', (int) $data->message);
 
-        $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_REPEATS_COUNT);
+        if ($user->telegram_id !== null) {
+            $this->userAdapter->updateUserState($user->telegram_id, StateValue::AWAITING_REPEATS_COUNT);
 
-        $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.break_duration_saved'));
+            $this->telegramAdapter->sendMessage($user->telegram_id, __('pomodoro.break_duration_saved'));
+        }
     }
 }

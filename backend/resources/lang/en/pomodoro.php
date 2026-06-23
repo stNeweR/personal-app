@@ -62,8 +62,6 @@ return [
     'long_break_started' => 'Long break after :cycle cycles. Rest for :duration minutes.',
     'short_break_started' => 'Short break. Rest for :duration minutes.',
     'pomodoro_completed' => 'Congratulations! You have completed all Pomodoro cycles.',
-<<<<<<< HEAD
-=======
 
     // Email notification
     'notify_email_subject' => 'Pomodoro — notification',
@@ -73,5 +71,4 @@ return [
     'notify_work_complete_long' => '🍅 Work complete! Time for a long break (:duration min).',
     'notify_break_complete' => '✅ Break complete! Back to work (:duration min).',
     'notify_session_complete' => '🎉 All pomodoros in session complete! Great job!',
->>>>>>> course
 ];

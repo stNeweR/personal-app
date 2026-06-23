@@ -15,12 +15,12 @@ final class UserController
 {
     public function updatePlan(Request $request, GetAuthenticatedUserUseCase $getUser): JsonResponse
     {
+        /** @var \App\Modules\User\Infrastructure\Models\User $user */
+        $user = $request->user();
+        /** @var array{plan: string} $validated */
         $validated = $request->validate([
             'plan' => 'required|string|in:junior,middle,senior',
         ]);
-
-        /** @var \App\Modules\User\Infrastructure\Models\User $user */
-        $user = $request->user();
         $plan = Plan::from($validated['plan']);
 
         $user->update(['plan' => $plan]);

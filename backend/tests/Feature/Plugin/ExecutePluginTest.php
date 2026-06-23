@@ -38,7 +38,6 @@ final class ExecutePluginTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-<<<<<<< HEAD
         $mock = $this->createMock(PluginExecutorInterface::class);
         $mock->method('execute')
             ->with('calendar', 'list_events', [])
@@ -47,9 +46,6 @@ final class ExecutePluginTest extends TestCase
         $this->app->instance(PluginExecutorInterface::class, $mock);
 
         $response = $this->actingAs($user)->postJson("{$this->url}/calendar/list_events");
-=======
-        $response = $this->actingAs($user)->postJson("{$this->url}/yandex_calendar/list_events");
->>>>>>> course
 
         $response->assertOk();
     }

@@ -5,89 +5,48 @@ namespace App\Core\Telegram\Infrastructure\Services\Telegram;
 use App\Core\Telegram\Domain\Contracts\TelegramApiClientInterface;
 use App\Core\Telegram\Infrastructure\Services\Telegram\DTOs\SendMessageDTO;
 use App\Core\Telegram\Infrastructure\Services\Telegram\DTOs\TelegramApiResponse;
-<<<<<<< HEAD
-=======
-use Illuminate\Support\Facades\Http;
->>>>>>> course
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 
 final class TelegramApiClient implements TelegramApiClientInterface
 {
-<<<<<<< HEAD
-    private string $token;
-
-    private string $telegramUrl;
-
-    private string $telegramApiUrl;
-
-    public function __construct()
-    {
-        $this->token = Config::string('telegram.telegram_bot_token');
-        $this->telegramUrl = Config::string('telegram.telegram_url');
-        $this->telegramApiUrl = $this->telegramUrl.'/bot'.$this->token;
-    }
-
-    public function setWebhook(): TelegramApiResponse
-    {
-        $applicationEndpoint = Config::string('app.url').'/'.Config::string('telegram.application_webhook_endpoint');
-
-        $response = Http::timeout(30)->post($this->telegramApiUrl.'/setWebhook', [
-            'url' => $applicationEndpoint,
-        ]);
-
-        return TelegramApiResponse::from($response->json());
-    }
-
-    public function sendMessage(SendMessageDTO $dto): TelegramApiResponse
-    {
-        $response = Http::timeout(10)->post($this->telegramApiUrl.'/sendMessage', $dto->toArray());
-
-        return TelegramApiResponse::from($response->json());
-    }
-
-    public function setTelegramCommands(): TelegramApiResponse
-    {
-        $commands = Config::get('telegram.commands_info', []);
-
-        $response = Http::post($this->telegramApiUrl.'/setMyCommands', [
-            'commands' => $commands,
-        ]);
-
-        return TelegramApiResponse::from($response->json());
-    }
-}
-=======
     private function baseURL(): string
     {
         $token = Config::string('telegram.telegram_bot_token');
         $apiUrl = Config::string('telegram.telegram_url', 'https://api.telegram.org');
-        
-        return rtrim($apiUrl, '/') . '/bot' . $token;
+
+        return rtrim($apiUrl, '/').'/bot'.$token;
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
     private function makeRequest(string $method, array $payload = []): array
     {
-        $url = $this->baseURL() . '/' . $method;
-        
+        $url = $this->baseURL().'/'.$method;
+
         $response = Http::post($url, $payload);
-        
+
         if ($response->failed()) {
             return [
                 'ok' => false,
-                'description' => 'HTTP Error: ' . $response->status(),
+                'description' => 'HTTP Error: '.$response->status(),
             ];
         }
-        
-        return $response->json() ?? ['ok' => false, 'description' => 'Empty response'];
+
+        /** @var array<string, mixed> $decoded */
+        $decoded = $response->json() ?? ['ok' => false, 'description' => 'Empty response'];
+
+        return $decoded;
     }
 
     public function setWebhook(): TelegramApiResponse
     {
         $url = Config::string('telegram.webhook_url');
-        
+
         if ($url === '') {
-            $url = Config::string('app.url') . '/' . Config::string('telegram.application_webhook_endpoint');
+            $url = Config::string('app.url').'/'.Config::string('telegram.application_webhook_endpoint');
         }
 
         $result = $this->makeRequest('setWebhook', [
@@ -103,7 +62,7 @@ final class TelegramApiClient implements TelegramApiClientInterface
             'chat_id' => $dto->chatId,
             'text' => $dto->text,
         ];
-        
+
         if ($dto->parseMode !== '') {
             $payload['parse_mode'] = $dto->parseMode;
         }
@@ -125,6 +84,9 @@ final class TelegramApiClient implements TelegramApiClientInterface
         return $this->responseFromResult($result);
     }
 
+    /**
+     * @param  array<string, mixed>  $result
+     */
     private function responseFromResult(array $result): TelegramApiResponse
     {
         $description = $result['description'] ?? null;
@@ -142,4 +104,3 @@ final class TelegramApiClient implements TelegramApiClientInterface
         );
     }
 }
->>>>>>> course

@@ -9,6 +9,10 @@ use App\Modules\Plugin\Domain\Exceptions\PluginExecutionException;
 
 final class PluginExecutor implements PluginExecutorInterface
 {
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
     public function execute(string $pluginName, string $action, array $input = []): array
     {
         $phpPlugin = $this->resolvePhpPlugin($pluginName);
@@ -22,19 +26,23 @@ final class PluginExecutor implements PluginExecutorInterface
 
     private function resolvePhpPlugin(string $pluginName): ?object
     {
-        $className = 'Plugins\\' . $this->toPascalCase($pluginName) . '\\Plugin';
+        $className = 'Plugins\\'.$this->toPascalCase($pluginName).'\\Plugin';
 
-        if (!class_exists($className)) {
+        if (! class_exists($className)) {
             return null;
         }
 
-        return new $className();
+        return new $className;
     }
 
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
     private function executePhpPlugin(object $plugin, string $action, array $input): array
     {
-        if (!method_exists($plugin, 'execute')) {
-            throw new PluginExecutionException("Plugin does not have execute method");
+        if (! method_exists($plugin, 'execute')) {
+            throw new PluginExecutionException('Plugin does not have execute method');
         }
 
         $result = $plugin->execute($action, json_encode($input));
@@ -44,10 +52,14 @@ final class PluginExecutor implements PluginExecutorInterface
         }
 
         if (is_array($result)) {
+            /** @var array<string, mixed> $result */
             return $result;
         }
 
-        return (array) $result;
+        /** @var array<string, mixed> $arrayResult */
+        $arrayResult = (array) $result;
+
+        return $arrayResult;
     }
 
     private function toPascalCase(string $string): string

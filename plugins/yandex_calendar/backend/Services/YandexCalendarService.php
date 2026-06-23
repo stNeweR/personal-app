@@ -64,8 +64,8 @@ final class YandexCalendarService
         $todayStr = $today->format('Ymd');
 
         // Fetch ±1 day to handle timezone offsets.
-        $timeMin = $today->copy()->subDay()->format('Ymd') . 'T000000Z';
-        $timeMax = $today->copy()->addDay()->format('Ymd') . 'T235959Z';
+        $timeMin = $today->copy()->subDay()->format('Ymd').'T000000Z';
+        $timeMax = $today->copy()->addDay()->format('Ymd').'T235959Z';
 
         $calendars = $this->discoverCalendars($email, $appPassword);
 
@@ -111,9 +111,9 @@ XML;
      */
     private function discoverCalendars(string $email, string $appPassword): array
     {
-        $url = self::CALDAV_BASE . '/calendars/' . $email . '/';
+        $url = self::CALDAV_BASE.'/calendars/'.$email.'/';
 
-        $propfindBody = <<<XML
+        $propfindBody = <<<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <D:propfind xmlns:D="DAV:">
   <D:prop>
@@ -131,7 +131,7 @@ XML;
             ->send('PROPFIND', $url, ['body' => $propfindBody]);
 
         if ($response->failed()) {
-            throw new \RuntimeException('CalDAV discovery failed: ' . $response->body());
+            throw new \RuntimeException('CalDAV discovery failed: '.$response->body());
         }
 
         $xml = (string) $response->body();
@@ -139,7 +139,7 @@ XML;
             return [];
         }
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         if (@$dom->loadXML($xml) === false) {
             throw new \RuntimeException('Failed to parse CalDAV discovery response');
         }
@@ -158,7 +158,7 @@ XML;
             if ($isCalendar && $hrefNode !== null) {
                 $href = $hrefNode->textContent;
                 if ($href !== '') {
-                    $calendars[] = self::CALDAV_BASE . $href;
+                    $calendars[] = self::CALDAV_BASE.$href;
                 }
             }
         }
@@ -189,7 +189,7 @@ XML;
             return [];
         }
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         if (@$dom->loadXML($xml) === false) {
             return [];
         }
@@ -243,6 +243,7 @@ XML;
 
             if ($line === 'BEGIN:VEVENT') {
                 $inEvent = true;
+
                 continue;
             }
 

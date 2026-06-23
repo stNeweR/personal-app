@@ -3,13 +3,10 @@
 use App\Modules\Plugin\Infrastructure\Http\V1\Controllers\PluginController;
 use App\Modules\Pomodoro\Infrastructure\Http\V1\Controllers\PomodoroController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\AuthController;
-<<<<<<< HEAD
-use App\Modules\User\Infrastructure\Http\V1\Controllers\TodoistController;
-use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
-=======
 use App\Modules\User\Infrastructure\Http\V1\Controllers\NotificationController;
+use App\Modules\User\Infrastructure\Http\V1\Controllers\TodoistController;
 use App\Modules\User\Infrastructure\Http\V1\Controllers\UserController;
->>>>>>> course
+use App\Modules\User\Infrastructure\Http\V1\Controllers\YandexCalendarController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -34,8 +31,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('sessions/{id}', [PomodoroController::class, 'deleteSession']);
     });
 
-<<<<<<< HEAD
-=======
     Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
         Route::get('status', [NotificationController::class, 'status']);
         Route::put('channel', [NotificationController::class, 'updateChannel']);
@@ -46,7 +41,6 @@ Route::prefix('v1')->group(function () {
     Route::get('notifications/email/verify', [NotificationController::class, 'verifyEmail'])
         ->name('api.v1.notifications.email.verify');
 
->>>>>>> course
     Route::middleware('auth:sanctum')->prefix('plugins')->group(function () {
         Route::get('/', [PluginController::class, 'index']);
         Route::get('enabled', [PluginController::class, 'getEnabledManifests']);

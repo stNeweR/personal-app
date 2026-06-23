@@ -24,9 +24,13 @@ final class MigratePlugins extends Command
             return self::SUCCESS;
         }
 
+        /** @var list<string> $migrationsPaths */
         $migrationsPaths = [];
 
-        foreach (File::directories($pluginsPath) as $pluginDir) {
+        /** @var list<string> $directories */
+        $directories = File::directories($pluginsPath);
+
+        foreach ($directories as $pluginDir) {
             $migrationsDir = $pluginDir.'/backend/Migrations';
 
             if (File::isDirectory($migrationsDir)) {

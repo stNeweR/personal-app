@@ -26,7 +26,10 @@ final readonly class LinkTelegramAccountUseCase
             throw new \InvalidArgumentException('Link token already used');
         }
 
-        if ($linkToken->expires_at->isPast()) {
+        /** @var \Carbon\Carbon $expiresAt */
+        $expiresAt = $linkToken->expires_at;
+
+        if ($expiresAt->isPast()) {
             throw new \InvalidArgumentException('Link token expired');
         }
 

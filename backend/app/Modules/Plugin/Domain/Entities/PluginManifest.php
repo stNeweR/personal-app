@@ -18,19 +18,22 @@ final class PluginManifest
     ) {}
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param  array{name: string, version?: string, author?: string, description?: string, backend?: array{entry?: string, namespace?: string}, frontend?: array{entry?: string, widget?: string}}  $data
      */
     public static function fromArray(array $data): self
     {
+        $backend = $data['backend'] ?? [];
+        $frontend = $data['frontend'] ?? [];
+
         return new self(
-            name: $data['name'] ?? '',
+            name: (string) $data['name'],
             version: $data['version'] ?? '1.0.0',
             author: $data['author'] ?? null,
             description: $data['description'] ?? null,
-            backendEntry: $data['backend']['entry'] ?? 'backend/Plugin.php',
-            backendNamespace: $data['backend']['namespace'] ?? '',
-            frontendEntry: $data['frontend']['entry'] ?? 'frontend/index.ts',
-            frontendWidget: $data['frontend']['widget'] ?? '',
+            backendEntry: $backend['entry'] ?? 'backend/Plugin.php',
+            backendNamespace: $backend['namespace'] ?? '',
+            frontendEntry: $frontend['entry'] ?? 'frontend/index.ts',
+            frontendWidget: $frontend['widget'] ?? '',
         );
     }
 
